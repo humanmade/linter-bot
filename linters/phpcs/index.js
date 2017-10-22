@@ -2,7 +2,7 @@ const child_process = require( 'child_process' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const PHPCS_PATH = path.join( __dirname, 'vendor', 'bin', 'phpcs' );
+const PHPCS_PATH = path.join( __dirname, 'vendor', 'squizlabs', 'php_codesniffer', 'scripts', 'phpcs' );
 const CONFIG_NAMES = [
 	'phpcs.xml',
 	'phpcs.ruleset.xml',
@@ -35,50 +35,57 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
-module.exports = async codepath => {
+module.exports = codepath => {
 	// Detect a ruleset file if we can, otherwise use default.
-	const rulesetFiles = await Promise.all( CONFIG_NAMES.map( filename => {
+	return Promise.all( CONFIG_NAMES.map( filename => {
 		return new Promise( resolve => {
-			fs.access( path.join( codepath, filename ), err => {
-				resolve( err ? null : filename );
+			const filepath = path.join( codepath, filename );
+			fs.access( filepath, err => {
+				resolve( err ? null : filepath );
 			} );
 		} );
-	} ) );
-	const standard = rulesetFiles.find( file => !! file ) || DEFAULT_CONFIG;
-	console.log( standard );
+	} ) ).then( rulesetFiles => {
+		const standard = rulesetFiles.find( file => !! file ) || DEFAULT_CONFIG;
 
-	// const standard = 'PSR2'; //...
-	const args = [
-		`--standard=${standard}`,
-		'--report=json',
-		codepath
-	];
-	const opts = {
-		cwd: __dirname,
-		env: process.env,
-	};
+		// const standard = 'PSR2'; //...
+		const args = [
+			PHPCS_PATH,
+			'--runtime-set',
+			'installed_paths',
+			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer',
+			`--standard=${standard}`,
+			'--report=json',
+			codepath
+		];
+		const opts = {
+			cwd: __dirname,
+			env: process.env,
+		};
 
-	return await new Promise( ( resolve, reject ) => {
-		const proc = child_process.spawn( PHPCS_PATH, args, opts );
-		let stdout = '';
-		let stderr = '';
-		proc.stdout.on( 'data', data => stdout += data );
-		proc.stderr.on( 'data', data => stderr += data );
-		proc.on( 'close', errCode => {
-			// 0 => no errors, 1 => errors, 2 => other
-			if ( errCode > 1 ) {
-				return reject( stderr || stdout );
-			}
+		return new Promise( ( resolve, reject ) => {
+			const proc = child_process.spawn( 'php', args, opts );
+			let stdout = '';
+			let stderr = '';
+			proc.stdout.on( 'data', data => stdout += data );
+			proc.stderr.on( 'data', data => stderr += data );
+			proc.on( 'error', e => { console.log(e) } );
+			proc.on( 'close', errCode => {
+				// 0 => no errors, 1 => errors, 2 => other
+				if ( errCode > 1 ) {
+					return reject( stderr || stdout );
+				}
 
-			let data;
-			try {
-				data = JSON.parse( stdout );
-			} catch ( e ) {
-				// Couldn't decode JSON, so likely a human readable error.
-				return reject( stdout );
-			}
+				let data;
+				try {
+					data = JSON.parse( stdout );
+				} catch ( e ) {
+					// Couldn't decode JSON, so likely a human readable error.
+					console.log(e)
+					return reject( stdout );
+				}
 
-			resolve( formatOutput( data, codepath ) );
+				resolve( formatOutput( data, codepath ) );
+			} );
 		} );
 	} );
 };

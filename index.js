@@ -1,11 +1,8 @@
-// Webpack setup
-require.include('probot')
-// If using webpack, uncomment this line to ensure
-// it inludes your private-key in the resulting bundle.
-require('file-loader?name=private-key.pem!./private-key.pem')
+require("babel-polyfill");
+
 const fs = require('fs')
 const cert = fs.readFileSync('private-key.pem', 'utf8')
-
+process.env['PATH'] = process.env['PATH'] + ':' + process.env['LAMBDA_TASK_ROOT'] + '/bin'
 // Probot setup
 const createProbot = require('./probot');
 const probot = createProbot({
@@ -31,23 +28,25 @@ module.exports.probotHandler = function (event, context, callback) {
   event.body = (typeof event.body === 'string') ? JSON.parse(event.body) : event.body
 
   try {
+    if ( ! e || ! event.body ) {
+      throw new Error( 'Payload not present or malformed.' );
+    }
     // Do the thing
-    probot.robot.webhook.emit(e, {
+    probot.receive({
       event: e,
-      id: event.headers['x-github-delivery'] || event.headers['X-GitHub-Delivery'],
       payload: event.body
     })
-
-    const res = {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'Executed'
-      })
-    }
-    callback(null, res)
+    .then(( err ) => {
+      const res = {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: 'Executed'
+        })
+      }
+      callback(null, res)
+    })
 
   } catch (err) {
-    console.log(err)
     callback(err)
   }
 

@@ -4,4 +4,6 @@
 dist/
 node_modules
 probot/
+plugin/linter.node6.js
+linters/phpcs/vendor
 event.json

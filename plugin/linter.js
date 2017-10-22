@@ -251,7 +251,7 @@ module.exports = robot => {
 
 				const body = files[ file ][ line ].join( '\n\n----\n\n' );
 				comments.push( {
-					file,
+					path: file,
 					position,
 					body,
 				} );
