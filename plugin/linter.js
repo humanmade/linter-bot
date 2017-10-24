@@ -5,6 +5,7 @@ const path = require( 'path' );
 const pify = require( 'pify' );
 const rimraf = require( 'rimraf' );
 const tar = require( 'tar' );
+const githubApi = require( 'github' );
 
 const realpath = pify( fs.realpath );
 
@@ -155,14 +156,15 @@ module.exports = robot => {
 		const repo = payload.repository.name;
 
 		// Set up the build first.
-		const setStatus = ( state, description ) => {
+		const setStatus = ( state, description, logUrl ) => {
 			github.repos.createStatus( {
 				owner,
 				repo,
 				sha:     commit,
 				context: 'hmlinter',
 				state,
-				description
+				description,
+				target_url: logUrl,
 			} );
 		};
 
@@ -177,9 +179,31 @@ module.exports = robot => {
 			throw e;
 		}
 
+		// Generate a string for a gist with all messages.
+		let logUrl = '';
+		if ( ! lintState.passed ) {
+			const comment = lintState.results.map( result => {
+				return Object.keys( result.files ).map( fileName => {
+					const messages = result.files[ fileName ];
+					return fileName + '\n\n' + messages.map( message => `${ message.line }\t:${ message.column }\t ${message.severity } ${message.message }` ).join( '\n' );
+				} );
+			} ).join( '\n\n' );
+
+			const anonymousGithub = new githubApi();
+			const response = await anonymousGithub.gists.create( {
+				files: {
+					'linter-output.txt': { content: comment },
+				},
+				public: false,
+				description: `${owner}/${repo} ${commit}`,
+			} );
+			logUrl = response.data.html_url;
+		}
+
 		setStatus(
 			lintState.passed ? 'success' : 'failure',
-			formatSummary( lintState )
+			formatSummary( lintState ),
+			logUrl
 		);
 	} );
 	robot.on( 'pull_request.opened', async context => {
