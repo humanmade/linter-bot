@@ -4,7 +4,7 @@ const fs = require('fs')
 const cert = fs.readFileSync('private-key.pem', 'utf8')
 process.env['PATH'] = process.env['PATH'] + ':' + process.env['LAMBDA_TASK_ROOT'] + '/bin'
 // Probot setup
-const createProbot = require('./probot');
+const createProbot = require('./probot/lib');
 const probot = createProbot({
   id: process.env.APP_ID,
   secret: process.env.WEBHOOK_SECRET,

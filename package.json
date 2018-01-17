@@ -6,7 +6,7 @@
     "babel-polyfill": "6.16.0",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
-    "probot": "^0.11.0",
+    "probot": "^4.1.0",
     "rimraf": "^2.6.2",
     "tar": "^4.0.1"
   },
