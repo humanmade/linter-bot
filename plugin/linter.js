@@ -205,6 +205,8 @@ module.exports = robot => {
 			formatSummary( lintState ),
 			logUrl
 		);
+
+		console.log( JSON.stringify( lintState, null, 2 ) );
 	} );
 	robot.on( 'pull_request.opened', async context => {
 		const { github, payload } = context;

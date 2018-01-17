@@ -20,6 +20,7 @@ probot.load(require('./plugin'));
 
 // Lambda Handler
 module.exports.probotHandler = function (event, context, callback) {
+  console.log( JSON.stringify( event, null, 2 ) );
   // Determine incoming webhook event type
   // Checking for different cases since node's http server is lowercasing everything
   const e = event.headers['x-github-event'] || event.headers['X-GitHub-Event']
