@@ -2,7 +2,7 @@ const child_process = require( 'child_process' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const PHPCS_PATH = path.join( __dirname, 'vendor', 'squizlabs', 'php_codesniffer', 'scripts', 'phpcs' );
+const PHPCS_PATH = path.join( __dirname, 'vendor', 'squizlabs', 'php_codesniffer', 'bin', 'phpcs' );
 const CONFIG_NAMES = [
 	'phpcs.xml',
 	'phpcs.ruleset.xml',
