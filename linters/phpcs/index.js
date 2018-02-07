@@ -18,6 +18,7 @@ const formatMessage = message => {
 		column:   message.column,
 		severity: message.severity === 5 ? 'error' : 'warning',
 		message:  text,
+		source:   message.source,
 	};
 };
 

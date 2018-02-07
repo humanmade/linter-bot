@@ -163,7 +163,7 @@ module.exports = robot => {
 				sha:     commit,
 				context: 'hmlinter',
 				state,
-				description,
+				description: description.substr( 0,139 ),
 				target_url: logUrl,
 			} );
 		};
@@ -182,17 +182,11 @@ module.exports = robot => {
 		// Generate a string for a gist with all messages.
 		let logUrl = '';
 		if ( ! lintState.passed ) {
-			const comment = lintState.results.map( result => {
-				return Object.keys( result.files ).map( fileName => {
-					const messages = result.files[ fileName ];
-					return fileName + '\n\n' + messages.map( message => `${ message.line }\t:${ message.column }\t ${message.severity } ${message.message }` ).join( '\n' );
-				} );
-			} ).join( '\n\n' );
 
 			const anonymousGithub = new githubApi();
 			const response = await anonymousGithub.gists.create( {
 				files: {
-					'linter-output.txt': { content: comment },
+					'linter-output.txt': { content: JSON.stringify( lintState, null, 2 ) },
 				},
 				public: false,
 				description: `${owner}/${repo} ${commit}`,
