@@ -1,0 +1,75 @@
+{
+  "action": "added",
+  "installation": {
+    "id": 61767,
+    "account": {
+      "login": "humanmade",
+      "id": 644666,
+      "avatar_url": "https://avatars1.githubusercontent.com/u/644666?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/humanmade",
+      "html_url": "https://github.com/humanmade",
+      "followers_url": "https://api.github.com/users/humanmade/followers",
+      "following_url": "https://api.github.com/users/humanmade/following{/other_user}",
+      "gists_url": "https://api.github.com/users/humanmade/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/humanmade/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/humanmade/subscriptions",
+      "organizations_url": "https://api.github.com/users/humanmade/orgs",
+      "repos_url": "https://api.github.com/users/humanmade/repos",
+      "events_url": "https://api.github.com/users/humanmade/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/humanmade/received_events",
+      "type": "Organization",
+      "site_admin": false
+    },
+    "repository_selection": "selected",
+    "access_tokens_url": "https://api.github.com/installations/61767/access_tokens",
+    "repositories_url": "https://api.github.com/installation/repositories",
+    "html_url": "https://github.com/organizations/humanmade/settings/installations/61767",
+    "app_id": 5455,
+    "target_id": 644666,
+    "target_type": "Organization",
+    "permissions": {
+      "pull_requests": "write",
+      "statuses": "write",
+      "contents": "read",
+      "metadata": "read"
+    },
+    "events": [
+      "pull_request",
+      "push"
+    ],
+    "created_at": 1508697521,
+    "updated_at": 1517926029,
+    "single_file_name": null
+  },
+  "repository_selection": "selected",
+  "repositories_added": [
+    {
+      "id": 120388807,
+      "name": "repress",
+      "full_name": "humanmade/repress"
+    }
+  ],
+  "repositories_removed": [
+
+  ],
+  "sender": {
+    "login": "rmccue",
+    "id": 21655,
+    "avatar_url": "https://avatars3.githubusercontent.com/u/21655?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/rmccue",
+    "html_url": "https://github.com/rmccue",
+    "followers_url": "https://api.github.com/users/rmccue/followers",
+    "following_url": "https://api.github.com/users/rmccue/following{/other_user}",
+    "gists_url": "https://api.github.com/users/rmccue/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/rmccue/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/rmccue/subscriptions",
+    "organizations_url": "https://api.github.com/users/rmccue/orgs",
+    "repos_url": "https://api.github.com/users/rmccue/repos",
+    "events_url": "https://api.github.com/users/rmccue/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/rmccue/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+}
