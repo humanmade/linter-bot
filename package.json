@@ -17,7 +17,7 @@
     "babel-preset-stage-0": "6.16.0"
   },
   "scripts": {
-    "build:babel": "( rm -r build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
+    "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
     "build:bin": "aws s3 sync s3://hm-linter/bin ./bin",
     "build:composer": "cd build/linters/phpcs && composer install",
     "build:npm": "docker run -v ${PWD}:/var/task lambci/lambda:build-nodejs6.10 npm install",
