@@ -83,7 +83,12 @@ const formatReview = ( lintState, mapping ) => {
 	return { body, comments, event };
 };
 
+const formatDetails = state => {
+	return JSON.stringify( state, null, 2 );
+};
+
 module.exports = {
+	formatDetails,
 	formatReview,
 	formatSummary,
 	resultsByFile,

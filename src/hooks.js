@@ -43,7 +43,7 @@ const onPush = async context => {
 		const anonymousGithub = new githubApi();
 		const response = await anonymousGithub.gists.create( {
 			files: {
-				'linter-output.txt': { content: JSON.stringify( lintState, null, 2 ) },
+				'linter-output.txt': { content: formatDetails( lintState ) },
 			},
 			public: false,
 			description: `${owner}/${repo} ${commit}`,
