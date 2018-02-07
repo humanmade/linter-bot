@@ -17,7 +17,7 @@
     "babel-preset-stage-0": "6.16.0"
   },
   "scripts": {
-    "build:babel": "( rm -r build || true ) && mkdir build && babel src --out-dir build && babel node_modules/probot --out-dir build/probot",
+    "build:babel": "( rm -r build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor && babel node_modules/probot --out-dir build/probot",
     "build:npm": "docker run -v ${PWD}:/var/task lambci/lambda:build-nodejs6.10 npm install",
     "build": "npm run build:babel && npm run build:npm",
     "deploy": "npm run build && zip --symlinks -9 -x lambda-function.zip -r lambda-function * && aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
