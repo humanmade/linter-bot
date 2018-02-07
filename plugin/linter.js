@@ -1,53 +1,8 @@
-const parseDiff = require( 'parse-diff' );
 const githubApi = require( 'github' );
 
 const runForRepo = require( './run.js' );
-
-const formatSummary = status => {
-	const { passed, totals } = status;
-	if ( passed ) {
-		return 'All linters passed';
-	}
-
-	const summaryBits = [];
-	if ( totals.errors ) {
-		summaryBits.push( totals.errors === 1 ? '1 error' : `${ totals.errors } errors` );
-	}
-	if ( totals.warnings ) {
-		summaryBits.push( totals.warnings === 1 ? '1 warning' : `${ totals.warnings } warnings` );
-	}
-	return summaryBits.join( ', ' );
-};
-
-const getDiffMapping = async ( pushConfig, number, github ) => {
-	const diff = await github.pullRequests.get({
-		owner: pushConfig.owner,
-		repo: pushConfig.repo,
-		number,
-
-		headers: {
-			Accept: 'application/vnd.github.v3.diff',
-		}
-	});
-
-	// Form mapping.
-	const mapping = {};
-	const parsedFiles = parseDiff( diff.data );
-	parsedFiles.forEach( file => {
-		let position = 0;
-		mapping[ file.to ] = {};
-		file.chunks.forEach( (chunk, index) => {
-			if (index !== 0) {
-				position++;
-			}
-			chunk.changes.forEach( change => {
-				position++;
-				mapping[ file.to ][ change.ln || change.ln2 ] = position;
-			} );
-		} );
-	} );
-	return mapping;
-};
+const { getDiffMapping } = require( './diff' );
+const { formatSummary } = require( './format' );
 
 module.exports = robot => {
 	robot.on( 'push', async context => {
