@@ -1,3 +1,4 @@
 module.exports = [
-	require( './phpcs' )
+	require( './eslint' ),
+	require( './phpcs' ),
 ];
