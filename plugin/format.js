@@ -1,4 +1,4 @@
-module.exports.formatSummary = status => {
+const formatSummary = status => {
 	const { passed, totals } = status;
 	if ( passed ) {
 		return 'All linters passed';
@@ -35,9 +35,8 @@ const resultsByFile = results => {
 	} );
 	return files;
 };
-module.exports.resultsByFile = resultsByFile;
 
-module.exports.formatReview = ( lintState, mapping ) => {
+const formatReview = ( lintState, mapping ) => {
 	// Convert to GitHub comments.
 	const comments = [];
 	let skipped = 0;
@@ -82,4 +81,10 @@ module.exports.formatReview = ( lintState, mapping ) => {
 	}
 
 	return { body, comments, event };
+};
+
+module.exports = {
+	formatReview,
+	formatSummary,
+	resultsByFile,
 };
