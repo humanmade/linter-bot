@@ -1,7 +1,7 @@
 const githubApi = require( 'github' );
 
-const run = require( '../plugin/run' );
-const { formatSummary, resultsByFile } = require( '../plugin/format' );
+const run = require( '../src/run' );
+const { formatSummary, resultsByFile } = require( '../src/format' );
 
 const printUsage = () => {
 	console.log( 'node test-commit.js <owner>/<repo> <commit>' );

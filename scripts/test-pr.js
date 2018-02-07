@@ -1,8 +1,8 @@
 const githubApi = require( 'github' );
 
-const runForRepo = require( '../plugin/run' );
-const { getDiffMapping } = require( '../plugin/diff' );
-const { formatReview, formatSummary } = require( '../plugin/format' );
+const runForRepo = require( '../src/run' );
+const { getDiffMapping } = require( '../src/diff' );
+const { formatReview, formatSummary } = require( '../src/format' );
 
 const printUsage = () => {
 	console.log( 'node test-commit.js <owner>/<repo> <pr>' );
