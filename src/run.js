@@ -8,7 +8,7 @@ const tar = require( 'tar' );
 const realpath = pify( fs.realpath );
 
 const linters = [
-	require( '../linters/phpcs' )
+	require( './linters/phpcs' )
 ];
 
 const DOWNLOAD_DIR = '/tmp/downloads';
