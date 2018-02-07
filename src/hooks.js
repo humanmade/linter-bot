@@ -58,7 +58,7 @@ const onPush = async context => {
 	);
 
 	console.log( JSON.stringify( lintState, null, 2 ) );
-} );
+};
 
 const onOpenPull = async context => {
 	const { github, payload } = context;
@@ -112,7 +112,7 @@ const onOpenPull = async context => {
 		event,
 		comments:  comments,
 	} );
-} );
+};
 
 module.exports = {
 	onPush,
