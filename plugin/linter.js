@@ -2,7 +2,7 @@ const githubApi = require( 'github' );
 
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
-const { formatSummary } = require( './format' );
+const { formatReview, formatSummary } = require( './format' );
 
 module.exports = robot => {
 	robot.on( 'push', async context => {
@@ -90,65 +90,7 @@ module.exports = robot => {
 			return;
 		}
 
-		// Combine all messages.
-		const files = {};
-		lintState.results.forEach( result => {
-			Object.keys( result.files ).forEach( file => {
-				if ( ! files[ file ] ) {
-					files[ file ] = {};
-				}
-				const comments = result.files[ file ];
-				comments.forEach( comment => {
-					if ( ! files[ file ][ comment.line ] ) {
-						files[ file ][ comment.line ] = []
-					}
-					files[ file ][ comment.line ].push(
-						comment.message
-					);
-				} );
-			} );
-		} );
-
-		// Convert to GitHub comments.
-		const comments = [];
-		let skipped = 0;
-		Object.keys( files ).forEach( file => {
-			Object.keys( files[ file ] ).forEach( line => {
-				// Skip files which didn't change.
-				if ( ! diffMapping[ file ] ) {
-					skipped += files[ file ][ line ].length;
-					return;
-				}
-
-				// Translate line to diff position.
-				const position = diffMapping[ file ][ line ];
-				if ( ! position ) {
-					skipped += files[ file ][ line ].length;
-					return;
-				}
-
-				const body = files[ file ][ line ].join( '\n\n----\n\n' );
-				comments.push( {
-					path: file,
-					position,
-					body,
-				} );
-			} );
-		} );
-
-		let body = `Linting failed (${ formatSummary( lintState ) }).`;
-		let event = 'REQUEST_CHANGES';
-		if ( skipped ) {
-			const numText = skipped === 1 ? '1 notice' : `${skipped} notices`;
-
-			if ( comments.length === 0 ) {
-				// All errors already existing.
-				event = 'COMMENT';
-				body += `\n\n${numText} occurred in your codebase, but none on files/lines included in this PR.`;
-			} else {
-				body += `\n\n(${numText} occurred in your codebase, but were on files/lines not included in this PR.)`;
-			}
-		}
+		const { body, comments, event } = formatReview( lintState, diffMapping );
 		console.log( {
 			owner,
 			repo,
