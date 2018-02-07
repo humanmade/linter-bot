@@ -16,7 +16,7 @@ const probot = createProbot({
 // You can specify plugins in an `index.js` file or your own custom file by providing
 // a primary entry point in the "main" field of `./plugin/package.json`
 // https://docs.npmjs.com/files/package.json#main
-probot.load(require('./plugin'));
+probot.load(require('./build'));
 
 // Lambda Handler
 module.exports.probotHandler = function (event, context, callback) {

@@ -18,6 +18,7 @@
     "babel-preset-stage-0": "6.16.0"
   },
   "scripts": {
+    "build:new": "( rm -r build || true ) && mkdir build && babel plugin --out-dir build && babel node_modules/probot --out-dir build/probot",
     "build": "babel node_modules/probot --out-dir probot && babel plugin/linter.js > plugin/linter.node6.js && docker run -v ${PWD}:/var/task lambci/lambda:build-nodejs6.10 npm install",
     "deploy": "npm run build && zip --symlinks -9 -x lambda-function.zip -r lambda-function * && aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
     "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs6.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\"",
