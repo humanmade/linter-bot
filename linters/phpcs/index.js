@@ -70,8 +70,11 @@ module.exports = codepath => {
 			proc.stderr.on( 'data', data => stderr += data );
 			proc.on( 'error', e => { console.log(e) } );
 			proc.on( 'close', errCode => {
-				// 0 => no errors, 1 => errors, 2 => other
-				if ( errCode > 1 ) {
+				// 0: no errors found
+				// 1: errors found
+				// 2: fixable errors found
+				// 3: processing error
+				if ( errCode > 2 ) {
 					return reject( stderr || stdout );
 				}
 
