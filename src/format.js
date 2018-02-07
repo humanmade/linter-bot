@@ -89,7 +89,7 @@ const formatWelcome = ( state, gistUrl ) => {
 	body += ` I found ${ formatSummary( state ) } in your project.`;
 	body += `\n\nFor more information about hm-linter, see [the project repo](https://github.com/humanmade/linter-bot).`
 	body += ` If you need a hand with anything, ping @rmccue or @joehoyle who are always happy to help.`;
-	body += `\n\n:heart:`;
+	body += `\n\n:heart: :robot:`;
 	return body;
 };
 
