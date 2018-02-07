@@ -55,6 +55,7 @@ module.exports = codepath => {
 			'installed_paths',
 			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer',
 			`--standard=${standard}`,
+			`--extensions=php`,
 			'--report=json',
 			codepath
 		];
