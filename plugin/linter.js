@@ -175,6 +175,7 @@ module.exports = robot => {
 		try {
 			lintState = await runForRepo( pushConfig, github );
 		} catch ( e ) {
+			console.log(e)
 			setStatus( 'error', `Could not run: ${ e }` );
 			throw e;
 		}
