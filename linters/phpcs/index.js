@@ -84,6 +84,7 @@ module.exports = codepath => {
 					data = JSON.parse( stdout );
 				} catch ( e ) {
 					// Couldn't decode JSON, so likely a human readable error.
+					console.log(stdout)
 					console.log(e)
 					return reject( stdout );
 				}
