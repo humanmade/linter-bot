@@ -1,8 +1,6 @@
 {
   "private": true,
   "dependencies": {
-    "babel-core": "6.17.0",
-    "babel-plugin-transform-runtime": "6.15.0",
     "babel-polyfill": "6.16.0",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
@@ -11,6 +9,7 @@
     "tar": "^4.0.1"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-core": "6.17.0",
     "babel-plugin-transform-runtime": "6.15.0",
     "babel-polyfill": "6.16.0",
@@ -18,9 +17,14 @@
     "babel-preset-stage-0": "6.16.0"
   },
   "scripts": {
-    "build": "babel node_modules/probot --out-dir probot && babel plugin/linter.js > plugin/linter.node6.js && docker run -v ${PWD}:/var/task lambci/lambda:build-nodejs6.10 npm install",
-    "deploy": "npm run build && zip --symlinks -9 -x lambda-function.zip -r lambda-function * && aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
-    "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs6.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\"",
-    "download-php-binary": "aws s3 sync s3://hm-linter/bin ./bin"
+    "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
+    "build:bin": "aws s3 sync s3://hm-linter/bin ./bin",
+    "build:composer": "cd build/linters/phpcs && composer install",
+    "build:npm": "docker run -v \"${PWD}\":/var/task lambci/lambda:build-nodejs6.10 npm install",
+    "build": "npm run build:babel && npm run build:composer && npm run build:bin && npm run build:npm",
+    "deploy:package": "npm run build && zip --symlinks -9 -x lambda-function.zip -r lambda-function *",
+    "deploy:push": "aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
+    "deploy": "npm run deploy:package && npm run deploy:push",
+    "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs6.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
   }
 }
