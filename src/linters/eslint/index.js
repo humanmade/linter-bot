@@ -1,7 +1,11 @@
-const { CLIEngine } = require( 'eslint' );
 const fs = require( 'fs' );
+const Module = require( 'module' );
 const path = require( 'path' );
 
+const EXTRA_MODULE_PATHS = [
+	path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', 'node_modules' ),
+	path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', 'packages' ),
+];
 const DEFAULT_CONFIG = path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', '.eslintrc.yml' );
 
 const formatMessage = message => {
@@ -33,6 +37,10 @@ module.exports = codepath => {
 	const options = {
 		cwd: codepath,
 	};
+	const prevPaths = Module.globalPaths.slice();
+	Module.globalPaths.push( ...EXTRA_MODULE_PATHS );
+
+	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
 
 	let output;
@@ -48,5 +56,7 @@ module.exports = codepath => {
 			throw err;
 		}
 	}
+
+	Module.globalPaths = prevPaths;
 	return formatOutput( output, codepath );
 };
