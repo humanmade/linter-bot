@@ -83,8 +83,24 @@ const formatReview = ( lintState, mapping ) => {
 	return { body, comments, event };
 };
 
+const formatWelcome = ( state, gistUrl ) => {
+	let body = `Hi there! Thanks for activating hm-linter on this repo.`
+	body += `\n\nTo start you off, [here's an initial lint report of the repo](${ gistUrl }).`;
+	body += ` I found ${ formatSummary( state ) } in your project.`;
+	body += `\n\nFor more information about hm-linter, see [the project repo](https://github.com/humanmade/linter-bot).`
+	body += ` If you need a hand with anything, ping @rmccue or @joehoyle who are always happy to help.`;
+	body += `\n\n:heart: :robot:`;
+	return body;
+};
+
+const formatDetails = state => {
+	return JSON.stringify( state, null, 2 );
+};
+
 module.exports = {
+	formatDetails,
 	formatReview,
 	formatSummary,
+	formatWelcome,
 	resultsByFile,
 };

@@ -2,7 +2,48 @@ const githubApi = require( 'github' );
 
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
-const { formatReview, formatSummary } = require( './format' );
+const { formatDetails, formatReview, formatSummary, formatWelcome } = require( './format' );
+
+const onAdd = async context => {
+	const { github, payload } = context;
+	const owner = payload.installation.account.login;
+	const repos = payload.repositories_added;
+
+	repos.forEach( async repo => {
+		const { data } = await github.repos.get( { owner, repo: repo.name } );
+		const branch = await github.repos.getBranch( { owner, repo: repo.name, branch: data.default_branch } );
+
+		const pushConfig = {
+			owner,
+			repo: repo.name,
+			commit: branch.data.commit.sha,
+		};
+		let lintState;
+		try {
+			lintState = await runForRepo( pushConfig, github );
+		} catch ( e ) {
+			console.log( e );
+			throw e;
+		}
+
+		const anonymousGithub = new githubApi();
+		const response = await anonymousGithub.gists.create( {
+			files: {
+				'linter-output.txt': { content: formatDetails( lintState ) },
+			},
+			public: false,
+			description: `${ owner }/${ repo.name } ${ branch.data.commit.sha }`,
+		} );
+		const body = formatWelcome( lintState, response.data.html_url );
+		const summary = formatSummary( lintState );
+		github.issues.create( {
+			owner,
+			repo: repo.name,
+			title: `Hello from hm-linter! (${ summary })`,
+			body,
+		} );
+	} );
+};
 
 const onPush = async context => {
 	// Start a "build".
@@ -43,7 +84,7 @@ const onPush = async context => {
 		const anonymousGithub = new githubApi();
 		const response = await anonymousGithub.gists.create( {
 			files: {
-				'linter-output.txt': { content: JSON.stringify( lintState, null, 2 ) },
+				'linter-output.txt': { content: formatDetails( lintState ) },
 			},
 			public: false,
 			description: `${owner}/${repo} ${commit}`,
@@ -115,6 +156,7 @@ const onOpenPull = async context => {
 };
 
 module.exports = {
+	onAdd,
 	onPush,
 	onOpenPull,
 };
