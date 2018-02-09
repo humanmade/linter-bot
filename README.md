@@ -6,7 +6,13 @@ Very early work on a GitHub bot for linting. Uses Probot for GitHub webhook inte
 
 ### Live Testing
 
-The easiest and best way to test hm-linter is to run the bot in development mode. To do this, simply run `yarn start`. This will run the bot locally, and uses a proxy to forward all webhook events from GitHub.
+The easiest and best way to test hm-linter is to run the bot in development mode. This will run the bot locally, and uses a proxy to forward all webhook events from GitHub.
+
+To set this up:
+
+1. Download "hm-linter-development Private Key" from the team 1Password Documents.
+2. Save this file into the linter-bot directory as `development.private-key.pem`
+3. Run `yarn start`
 
 The development mode is set up only on the [linter-bot-test](https://github.com/humanmade/linter-bot-test) repository. You can add it to other repositories on the `humanmade` organisation, but **please only do this temporarily**. You should remove any repositories you add as soon as you're finished testing.
 
