@@ -19,7 +19,7 @@
   },
   "scripts": {
     "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
-    "build:bin": "aws s3 sync s3://hm-linter/bin ./bin",
+    "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
     "build:composer": "cd build/linters/phpcs && composer install",
     "build:npm": "docker run -v \"${PWD}\":/var/task lambci/lambda:build-nodejs6.10 npm install",
     "build": "npm run build:babel && npm run build:composer && npm run build:bin && npm run build:npm",
