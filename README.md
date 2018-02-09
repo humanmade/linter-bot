@@ -36,7 +36,13 @@ See the [HM Coding standards](https://github.com/humanmade/coding-standards) doc
 
 ## Development
 
-hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda.
+hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 6.10.
+
+To get started on development of hm-linter:
+
+1. Clone this repository
+2. `npm install` or `yarn install` the dependencies
+3. `cd src/linters/phpcs && composer install` to download the HM Coding Standards
 
 
 ### Testing
@@ -70,13 +76,22 @@ To test a `pull_request.synchronize` webhook:
 node_modules/.bin/probot simulate pull_request fixtures/pull_request.synchronize.json ./plugin/linter.js
 ```
 
-## Deployment
 
-Currently working on setting up for Lambda. See [README.old.md]() for the old repo readme from https://github.com/tcbyrd/probot-lambda which contains (outdated) instructions.
+### Deployment
 
-## Todo
+hm-linter is deployed on a Lambda instance. Deployment is handled via npm scripts, which you run via `npm run <script>` or `yarn run <script>`.
 
-* Update `index.js` for probot updates
-* Break `linter.js` up into more manageable pieces
-* Bundle PHP binary for running on Lambda
-* Run on Lambda
+To deploy hm-linter, you need the following things:
+
+* [AWS CLI](https://aws.amazon.com/cli/)
+* Docker - used to compile and test things in a Lambda-like environment
+* `private-key.pem` - Ask @rmccue or @joehoyle for this file.
+
+Deployment can be done in one step by running the `deploy` script, but you should generally test builds first. The following scripts will help with that:
+
+* `build` - Builds JS, downloads PHP binary, and installs Composer/npm dependencies.
+* `deploy:package` - Builds the directory into a zip. Use this to verify the ZIP before pushing.
+* `deploy:push` - Push the built zip to Lambda. Use this if `deploy` fails due to some sort of network error.
+* `test` - Run the index handler against a simulated Lambda environment. Before running this:
+	* Run `build` at least once
+	* Set the `AWS_LAMBDA_EVENT_BODY` environment variable to the contents of `fixtures/lambda-test-event.json` (`cat fixtures/lambda-test-event.json | read -z AWS_LAMBDA_EVENT_BODY`)
