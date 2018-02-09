@@ -1,3 +1,5 @@
+const _n = ( single, plural, count ) => count === 1 ? single : plural;
+
 const formatSummary = status => {
 	const { passed, totals } = status;
 	if ( passed ) {
@@ -6,10 +8,10 @@ const formatSummary = status => {
 
 	const summaryBits = [];
 	if ( totals.errors ) {
-		summaryBits.push( totals.errors === 1 ? '1 error' : `${ totals.errors } errors` );
+		summaryBits.push( `${ totals.errors } ${ _n( 'error', 'errors', totals.errors ) }` );
 	}
 	if ( totals.warnings ) {
-		summaryBits.push( totals.warnings === 1 ? '1 warning' : `${ totals.warnings } warnings` );
+		summaryBits.push( `${ totals.warnings } ${ _n( 'warning', 'warnings', totals.warnings ) }` );
 	}
 	return summaryBits.join( ', ' );
 };
