@@ -1,4 +1,22 @@
-# hmlinter bot
+<table width="100%">
+	<tr>
+		<td align="left" width="70%">
+			<strong>hm-linter bot</strong><br />
+			Automatically run the HM Coding Standards on any repository.
+		</td>
+		<td align="center" width="30%">
+			🤖
+		</td>
+	</tr>
+	<tr>
+		<td>
+			A <strong><a href="https://hmn.md/">Human Made</a></strong> project. Maintained by @rmccue and @joehoyle.
+		</td>
+		<td align="center" width="30%">
+			<img src="https://hmn.md/content/themes/hmnmd/assets/images/hm-logo.svg" width="100" />
+		</td>
+	</tr>
+</table>
 
 Very early work on a GitHub bot for linting. Uses Probot for GitHub webhook interactions.
 
