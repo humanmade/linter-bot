@@ -18,9 +18,28 @@
 	</tr>
 </table>
 
-Very early work on a GitHub bot for linting. Uses Probot for GitHub webhook interactions.
+Automatically run the [HM Coding standards](https://github.com/humanmade/coding-standards) on any repository.
 
-## Testing
+<img src="https://hmn.md/uploads/2018/02/Screenshot-2018-02-09-16.37.17.png" />
+
+
+## Installation
+
+To enable on any repository on GitHub, simply [head to the app page](https://github.com/apps/hm-linter) and Install/Configure. You'll get an initial report as a new issue if you have any existing linting errors in your codebase.
+
+Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs or [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint.
+
+See the [HM Coding standards](https://github.com/humanmade/coding-standards) documentation for how to configure specific rules.
+
+**Note:** Custom configuration can only use rules/standards which hm-linter has available. This includes the HM Coding Standards as well as any dependencies of it (such as the WP Coding Standards).
+
+
+## Development
+
+hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda.
+
+
+### Testing
 
 You'll want to use probot's simulation mode. This simulates a webhook request from GitHub, **but uses the live GitHub API**, so be careful. The fixture data included in the repo is from a test repository (rmccue/test-linter).
 
