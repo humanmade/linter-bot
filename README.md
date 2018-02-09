@@ -20,7 +20,7 @@
 
 Automatically run the [HM Coding standards](https://github.com/humanmade/coding-standards) on any repository.
 
-<img src="https://hmn.md/uploads/2018/02/Screenshot-2018-02-09-16.37.17.png" />
+<img src="https://hmn.md/uploads/2018/02/Screenshot-2018-02-09-16.37.17.png" width="774" />
 
 
 ## Installation
