@@ -1,3 +1,4 @@
+const metadata = require( './metadata' );
 const { combineLinters } = require( './util' );
 
 const _n = ( single, plural, count ) => count === 1 ? single : plural;
@@ -90,7 +91,14 @@ const formatReview = ( lintState, mapping ) => {
 		}
 	}
 
-	return { body, comments, event };
+	const withMetadata = body + metadata.serialize( lintState );
+
+	return {
+		// Don't allow the body to overflow.
+		body: withMetadata.length < 65536 ? withMetadata : body,
+		comments,
+		event,
+	};
 };
 
 const formatWelcome = ( state, gistUrl ) => {
