@@ -26,6 +26,11 @@ const formatOutput = ( data, codepath ) => {
 	const files = {};
 	// console.log( data );
 	data.results.forEach( result => {
+		// Exclude any empty files.
+		if ( ! result.messages.length ) {
+			return;
+		}
+
 		const relPath = path.relative( codepath, result.filePath );
 		files[ relPath ] = result.messages.map( formatMessage );
 	} );
