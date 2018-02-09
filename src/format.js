@@ -1,3 +1,5 @@
+const { combineLinters } = require( './util' );
+
 const _n = ( single, plural, count ) => count === 1 ? single : plural;
 
 const formatSummary = status => {
@@ -16,34 +18,31 @@ const formatSummary = status => {
 	return summaryBits.join( ', ' );
 };
 
-const resultsByFile = results => {
+const resultsByFile = combined => {
 	// Combine all messages.
 	const files = {};
-	results.forEach( result => {
-		Object.keys( result.files ).forEach( file => {
-			if ( ! files[ file ] ) {
-				files[ file ] = {};
+	Object.keys( combined ).forEach( file => {
+		if ( ! files[ file ] ) {
+			files[ file ] = {};
+		}
+		const comments = combined[ file ];
+		comments.forEach( comment => {
+			if ( ! files[ file ][ comment.line ] ) {
+				files[ file ][ comment.line ] = []
 			}
-			const comments = result.files[ file ];
-			comments.forEach( comment => {
-				if ( ! files[ file ][ comment.line ] ) {
-					files[ file ][ comment.line ] = []
-				}
-				files[ file ][ comment.line ].push(
-					comment.message
-				);
-			} );
+			files[ file ][ comment.line ].push(
+				comment.message
+			);
 		} );
 	} );
 	return files;
 };
 
-const formatReview = ( lintState, mapping ) => {
+const formatComments = ( files, mapping ) => {
 	// Convert to GitHub comments.
 	const comments = [];
 	let skipped = 0;
 
-	const files = resultsByFile( lintState.results );
 	Object.keys( files ).forEach( file => {
 		Object.keys( files[ file ] ).forEach( line => {
 			// Skip files which didn't change.
@@ -67,6 +66,15 @@ const formatReview = ( lintState, mapping ) => {
 			} );
 		} );
 	} );
+
+	return { comments, skipped };
+}
+
+const formatReview = ( lintState, mapping ) => {
+	// Convert to GitHub comments.
+	const allResults = combineLinters( lintState.results );
+	const files = resultsByFile( results );
+	const { comments, skipped } = formatComments( files, mapping );
 
 	let body = `Linting failed (${ formatSummary( lintState ) }).`;
 	let event = 'REQUEST_CHANGES';
