@@ -19,6 +19,37 @@ const formatSummary = status => {
 	return summaryBits.join( ', ' );
 };
 
+const formatComparison = comparison => {
+	const { fixedErrors, fixedWarnings, newErrors, newWarnings } = comparison.totals;
+
+	let errorStatus;
+	if ( fixedErrors ) {
+		errorStatus = `Fixed ${ fixedErrors } ${ _n( 'error', 'errors', fixedErrors ) }`;
+		if ( newErrors ) {
+			errorStatus += `, but introduced ${ newErrors } new ${ _n( 'error', 'errors', newErrors ) }`;
+		}
+	} else if ( newErrors ) {
+		errorStatus = `Introduced ${ newErrors } new ${ _n( 'error', 'errors', newErrors ) }`;
+	}
+
+	let warningStatus;
+	if ( fixedWarnings ) {
+		warningStatus = `Fixed ${ fixedWarnings } ${ _n( 'warning', 'warnings', fixedWarnings ) }`;
+		if ( newWarnings ) {
+			warningStatus += `, but introduced ${ newWarnings } new ${ _n( 'warning', 'warnings', newWarnings ) }`;
+		}
+	} else if ( newWarnings ) {
+		warningStatus = `Introduced ${ newWarnings } new ${ _n( 'warning', 'warnings', newWarnings ) }`;
+	}
+
+	const status = [ errorStatus, warningStatus ]
+		.filter( status => !! status )
+		.map( line => `* ${ line }` )
+		.join( '\n' );
+
+	return status;
+}
+
 const resultsByFile = combined => {
 	// Combine all messages.
 	const files = {};
@@ -101,6 +132,42 @@ const formatReview = ( lintState, mapping ) => {
 	};
 };
 
+const formatReviewChange = ( lintState, mapping, comparison ) => {
+	// Don't change the previous review if nothing in the codebase has changed.
+	if ( ! comparison.changed ) {
+		return null;
+	}
+
+	if ( lintState.passed ) {
+		return {
+			body: `Linting successful, all issues fixed! :tada:`,
+			event: 'APPROVE',
+		};
+	}
+
+	const formattedComparison = formatComparison( comparison );
+	const body = ( lintState.passed ? `Linting successful.` : `Linting failed (${ formatSummary( lintState ) }).` )
+		+ '\n\n' + formattedComparison;
+	const withMetadata = body + metadata.serialize( lintState );
+
+	const review = {
+		// Don't allow the body to overflow.
+		body: withMetadata.length < 65536 ? withMetadata : body,
+		event: 'REQUEST_CHANGES',
+	};
+
+	// Format comments if there are any to make.
+	if ( Object.keys( comparison.newIssues ).length > 0 ) {
+		const files = resultsByFile( comparison.newIssues );
+		const { comments } = formatComments( files, mapping );
+		if ( comments.length > 0 ) {
+			review.comments = comments;
+		}
+	}
+
+	return review;
+}
+
 const formatWelcome = ( state, gistUrl ) => {
 	let body = `Hi there! Thanks for activating hm-linter on this repo.`
 	body += `\n\nTo start you off, [here's an initial lint report of the repo](${ gistUrl }).`;
@@ -116,8 +183,10 @@ const formatDetails = state => {
 };
 
 module.exports = {
+	formatComparison,
 	formatDetails,
 	formatReview,
+	formatReviewChange,
 	formatSummary,
 	formatWelcome,
 	resultsByFile,
