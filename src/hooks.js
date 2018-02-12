@@ -2,7 +2,14 @@ const githubApi = require( 'github' );
 
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
-const { formatDetails, formatReview, formatSummary, formatWelcome } = require( './format' );
+const {
+	formatDetails,
+	formatReview,
+	formatReviewChange,
+	formatSummary,
+	formatWelcome
+} = require( './format' );
+const { compareRuns, getPreviousRun } = require( './review' );
 
 const onAdd = async context => {
 	const { github, payload } = context;
@@ -155,8 +162,54 @@ const onOpenPull = async context => {
 	} );
 };
 
+const onUpdatePull = async context => {
+	const { github, payload } = context;
+	const commit = payload.pull_request.head.sha;
+	const owner = payload.repository.owner.login;
+	const repo = payload.repository.name;
+
+	// Run the linter, and also fetch the PR diff.
+	const pushConfig = { commit, owner, repo };
+
+	let diffMapping, lintState, previousState;
+	try {
+		[ lintState, diffMapping, previousState ] = await Promise.all([
+			runForRepo( pushConfig, github ),
+			getDiffMapping( pushConfig, payload.number, github ),
+			getPreviousRun( github, owner, repo, payload.number ),
+		]);
+	} catch ( e ) {
+		throw e;
+	}
+
+	// If there's no previous state, ignore this update.
+	if ( ! previousState ) {
+		console.log( 'No previous state' );
+		return;
+	}
+
+	const comparison = compareRuns( previousState, lintState );
+	const review = formatReviewChange( lintState, diffMapping, comparison );
+	console.log( { comparison, review } );
+
+	if ( ! review ) {
+		console.log( 'No review' );
+		return;
+	}
+
+	github.pullRequests.createReview( {
+		owner,
+		repo,
+		number:    payload.number,
+		commit_id: commit,
+
+		...review,
+	} );
+}
+
 module.exports = {
 	onAdd,
 	onPush,
 	onOpenPull,
+	onUpdatePull,
 };

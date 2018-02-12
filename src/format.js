@@ -1,3 +1,8 @@
+const metadata = require( './metadata' );
+const { combineLinters } = require( './util' );
+
+const _n = ( single, plural, count ) => count === 1 ? single : plural;
+
 const formatSummary = status => {
 	const { passed, totals } = status;
 	if ( passed ) {
@@ -6,42 +11,70 @@ const formatSummary = status => {
 
 	const summaryBits = [];
 	if ( totals.errors ) {
-		summaryBits.push( totals.errors === 1 ? '1 error' : `${ totals.errors } errors` );
+		summaryBits.push( `${ totals.errors } ${ _n( 'error', 'errors', totals.errors ) }` );
 	}
 	if ( totals.warnings ) {
-		summaryBits.push( totals.warnings === 1 ? '1 warning' : `${ totals.warnings } warnings` );
+		summaryBits.push( `${ totals.warnings } ${ _n( 'warning', 'warnings', totals.warnings ) }` );
 	}
 	return summaryBits.join( ', ' );
 };
 
-const resultsByFile = results => {
+const formatComparison = comparison => {
+	const { fixedErrors, fixedWarnings, newErrors, newWarnings } = comparison.totals;
+
+	let errorStatus;
+	if ( fixedErrors ) {
+		errorStatus = `Fixed ${ fixedErrors } ${ _n( 'error', 'errors', fixedErrors ) }`;
+		if ( newErrors ) {
+			errorStatus += `, but introduced ${ newErrors } new ${ _n( 'error', 'errors', newErrors ) }`;
+		}
+	} else if ( newErrors ) {
+		errorStatus = `Introduced ${ newErrors } new ${ _n( 'error', 'errors', newErrors ) }`;
+	}
+
+	let warningStatus;
+	if ( fixedWarnings ) {
+		warningStatus = `Fixed ${ fixedWarnings } ${ _n( 'warning', 'warnings', fixedWarnings ) }`;
+		if ( newWarnings ) {
+			warningStatus += `, but introduced ${ newWarnings } new ${ _n( 'warning', 'warnings', newWarnings ) }`;
+		}
+	} else if ( newWarnings ) {
+		warningStatus = `Introduced ${ newWarnings } new ${ _n( 'warning', 'warnings', newWarnings ) }`;
+	}
+
+	const status = [ errorStatus, warningStatus ]
+		.filter( status => !! status )
+		.map( line => `* ${ line }` )
+		.join( '\n' );
+
+	return status;
+}
+
+const resultsByFile = combined => {
 	// Combine all messages.
 	const files = {};
-	results.forEach( result => {
-		Object.keys( result.files ).forEach( file => {
-			if ( ! files[ file ] ) {
-				files[ file ] = {};
+	Object.keys( combined ).forEach( file => {
+		if ( ! files[ file ] ) {
+			files[ file ] = {};
+		}
+		const comments = combined[ file ];
+		comments.forEach( comment => {
+			if ( ! files[ file ][ comment.line ] ) {
+				files[ file ][ comment.line ] = []
 			}
-			const comments = result.files[ file ];
-			comments.forEach( comment => {
-				if ( ! files[ file ][ comment.line ] ) {
-					files[ file ][ comment.line ] = []
-				}
-				files[ file ][ comment.line ].push(
-					comment.message
-				);
-			} );
+			files[ file ][ comment.line ].push(
+				comment.message
+			);
 		} );
 	} );
 	return files;
 };
 
-const formatReview = ( lintState, mapping ) => {
+const formatComments = ( files, mapping ) => {
 	// Convert to GitHub comments.
 	const comments = [];
 	let skipped = 0;
 
-	const files = resultsByFile( lintState.results );
 	Object.keys( files ).forEach( file => {
 		Object.keys( files[ file ] ).forEach( line => {
 			// Skip files which didn't change.
@@ -66,6 +99,15 @@ const formatReview = ( lintState, mapping ) => {
 		} );
 	} );
 
+	return { comments, skipped };
+}
+
+const formatReview = ( lintState, mapping ) => {
+	// Convert to GitHub comments.
+	const allResults = combineLinters( lintState.results );
+	const files = resultsByFile( results );
+	const { comments, skipped } = formatComments( files, mapping );
+
 	let body = `Linting failed (${ formatSummary( lintState ) }).`;
 	let event = 'REQUEST_CHANGES';
 	if ( skipped ) {
@@ -80,8 +122,51 @@ const formatReview = ( lintState, mapping ) => {
 		}
 	}
 
-	return { body, comments, event };
+	const withMetadata = body + metadata.serialize( lintState );
+
+	return {
+		// Don't allow the body to overflow.
+		body: withMetadata.length < 65536 ? withMetadata : body,
+		comments,
+		event,
+	};
 };
+
+const formatReviewChange = ( lintState, mapping, comparison ) => {
+	// Don't change the previous review if nothing in the codebase has changed.
+	if ( ! comparison.changed ) {
+		return null;
+	}
+
+	if ( lintState.passed ) {
+		return {
+			body: `Linting successful, all issues fixed! :tada:`,
+			event: 'APPROVE',
+		};
+	}
+
+	const formattedComparison = formatComparison( comparison );
+	const body = ( lintState.passed ? `Linting successful.` : `Linting failed (${ formatSummary( lintState ) }).` )
+		+ '\n\n' + formattedComparison;
+	const withMetadata = body + metadata.serialize( lintState );
+
+	const review = {
+		// Don't allow the body to overflow.
+		body: withMetadata.length < 65536 ? withMetadata : body,
+		event: 'REQUEST_CHANGES',
+	};
+
+	// Format comments if there are any to make.
+	if ( Object.keys( comparison.newIssues ).length > 0 ) {
+		const files = resultsByFile( comparison.newIssues );
+		const { comments } = formatComments( files, mapping );
+		if ( comments.length > 0 ) {
+			review.comments = comments;
+		}
+	}
+
+	return review;
+}
 
 const formatWelcome = ( state, gistUrl ) => {
 	let body = `Hi there! Thanks for activating hm-linter on this repo.`
@@ -98,8 +183,10 @@ const formatDetails = state => {
 };
 
 module.exports = {
+	formatComparison,
 	formatDetails,
 	formatReview,
+	formatReviewChange,
 	formatSummary,
 	formatWelcome,
 	resultsByFile,
