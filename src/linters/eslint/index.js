@@ -12,7 +12,7 @@ const formatMessage = message => {
 	return {
 		line:     message.line,
 		column:   message.column,
-		severity: message.severity === 5 ? 'error' : 'warning',
+		severity: message.severity >= 2 ? 'error' : 'warning',
 		message:  message.message,
 		source:   message.ruleId,
 	};
@@ -26,6 +26,11 @@ const formatOutput = ( data, codepath ) => {
 	const files = {};
 	// console.log( data );
 	data.results.forEach( result => {
+		// Exclude any empty files.
+		if ( ! result.messages.length ) {
+			return;
+		}
+
 		const relPath = path.relative( codepath, result.filePath );
 		files[ relPath ] = result.messages.map( formatMessage );
 	} );
