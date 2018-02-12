@@ -28,6 +28,13 @@ const main = argv => {
 	};
 	const github = new githubApi();
 
+	if ( process.env.HM_LINTER_GITHUB_TOKEN ) {
+		github.authenticate( {
+			type: 'token',
+			token: process.env.HM_LINTER_GITHUB_TOKEN,
+		} );
+	}
+
 	run( pushConfig, github )
 		.then( results => {
 			const summary = formatSummary( results );
