@@ -20,13 +20,14 @@
   },
   "scripts": {
     "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
-    "build:bin": "aws s3 sync s3://hm-linter/bin ./bin",
+    "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
     "build:composer": "cd build/linters/phpcs && composer install",
     "build:npm": "docker run -v \"${PWD}\":/var/task lambci/lambda:build-nodejs6.10 npm install",
     "build": "npm run build:babel && npm run build:composer && npm run build:bin && npm run build:npm",
-    "deploy:package": "npm run build && zip --symlinks -9 -x lambda-function.zip -r lambda-function *",
+    "deploy:check": "test -f bin/php && test -f private-key.pem",
+    "deploy:package": "zip --symlinks -9 -x lambda-function.zip -x \"src/*\" -r lambda-function *",
     "deploy:push": "aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
-    "deploy": "npm run deploy:package && npm run deploy:push",
+    "deploy": "npm run build && npm run deploy:check && npm run deploy:package && npm run deploy:push",
     "start": "node start-development.js",
     "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs6.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
   }
