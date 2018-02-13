@@ -10,7 +10,7 @@ const cert = fs.readFileSync( 'development.private-key.pem', 'utf8' );
 process.env['PATH'] = process.env['PATH'] + ':' + path.join( __dirname, 'bin' );
 
 // Probot setup
-const createProbot = require( './probot/lib' );
+const createProbot = require( './build/probot/lib' );
 const probot = createProbot( {
 	id: 8936,
 	secret: 'development',
