@@ -42,8 +42,11 @@ module.exports = codepath => {
 	const options = {
 		cwd: codepath,
 	};
-	const prevPaths = Module.globalPaths.slice();
-	Module.globalPaths.push( ...EXTRA_MODULE_PATHS );
+
+	// SUPER-HACK!
+	const prevPath = process.env.NODE_PATH;
+	process.env.NODE_PATH = EXTRA_MODULE_PATHS.join( path.delimiter );
+	Module._initPaths();
 
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
@@ -62,6 +65,9 @@ module.exports = codepath => {
 		}
 	}
 
-	Module.globalPaths = prevPaths;
+	// Undo SUPER-HACK!
+	process.env.NODE_PATH = prevPath;
+	Module._initPaths();
+
 	return formatOutput( output, codepath );
 };
