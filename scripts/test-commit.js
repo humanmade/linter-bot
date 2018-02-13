@@ -35,7 +35,7 @@ const main = argv => {
 		} );
 	}
 
-	run( pushConfig, github )
+	run( pushConfig, github, true )
 		.then( results => {
 			const summary = formatSummary( results );
 			if ( results.passed ) {
