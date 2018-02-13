@@ -69,9 +69,9 @@ module.exports = async ( pushConfig, github ) => {
 	}
 
 	const extracted = await tar.extract( {
-		cwd:   extractDir,
-		file:  tarball,
-		strip: 1,
+		cwd:    extractDir,
+		file:   tarball,
+		strip:  1,
 		filter: path => ! path.match( /\.(jpg|jpeg|png|gif|woff|swf|flv|fla|woff|svg|otf||ttf|eot|swc|xap)$/ ),
 	} );
 
