@@ -105,7 +105,7 @@ const formatComments = ( files, mapping ) => {
 const formatReview = ( lintState, mapping ) => {
 	// Convert to GitHub comments.
 	const allResults = combineLinters( lintState.results );
-	const files = resultsByFile( results );
+	const files = resultsByFile( allResults );
 	const { comments, skipped } = formatComments( files, mapping );
 
 	let body = `Linting failed (${ formatSummary( lintState ) }).`;
