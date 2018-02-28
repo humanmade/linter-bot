@@ -51,23 +51,25 @@ module.exports = codepath => {
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
 
-	let output;
-	try {
-		output = engine.executeOnFiles( [ codepath ] );
-	} catch ( err ) {
-		if ( err.messageTemplate === 'no-config-found' ) {
-			// Try with default configuration.
-			const engine = new CLIEngine( { ...options, configFile: DEFAULT_CONFIG } );
+	return new Promise( ( resolve, reject ) => {
+		let output;
+		try {
 			output = engine.executeOnFiles( [ codepath ] );
-		} else {
-			console.log( err );
-			throw err;
+		} catch ( err ) {
+			if ( err.messageTemplate === 'no-config-found' ) {
+				// Try with default configuration.
+				const engine = new CLIEngine( { ...options, configFile: DEFAULT_CONFIG } );
+				output = engine.executeOnFiles( [ codepath ] );
+			} else {
+				console.log( err );
+				throw err;
+			}
 		}
-	}
 
-	// Undo SUPER-HACK!
-	process.env.NODE_PATH = prevPath;
-	Module._initPaths();
+		// Undo SUPER-HACK!
+		process.env.NODE_PATH = prevPath;
+		Module._initPaths();
 
-	return formatOutput( output, codepath );
+		resolve( formatOutput( output, codepath ) );
+	} );
 };

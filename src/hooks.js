@@ -55,6 +55,11 @@ const onAdd = async context => {
 const onPush = async context => {
 	// Start a "build".
 	const { github, payload } = context;
+	if ( payload.deleted ) {
+		// If the branch was deleted, skip.
+		return;
+	}
+
 	const commit = payload.head_commit.id;
 	const owner = payload.repository.owner.name;
 	const repo = payload.repository.name;
