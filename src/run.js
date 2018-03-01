@@ -43,46 +43,53 @@ const downloadFile = ( url, filename ) => {
 	} );
 };
 
-module.exports = async ( pushConfig, github ) => {
+module.exports = async ( pushConfig, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
 
-	// Don't follow redirects for this request.
-	github.config.followRedirects = false;
-	const archiveURLResult = await github.repos.getArchiveLink( {
-		owner,
-		repo,
-		archive_format: 'tarball',
-		ref:            pushConfig.commit,
-	});
-	const archiveURL = archiveURLResult.meta.location;
-	// Reset redirect config.
-	delete github.config.followRedirects;
-
 	const filename = `${owner}-${repo}-${commit}.tar.gz`;
-	const tarball = await downloadFile( archiveURL, filename );
-
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
-	try {
-		await pify( fs.mkdir )( extractDir );
-	} catch ( e ) {
-		// Ignore if it already exists.
+
+	if ( ! allowReuse || ! fs.existsSync( extractDir ) ) {
+		// Don't follow redirects for this request.
+		github.config.followRedirects = false;
+
+		const archiveURLResult = await github.repos.getArchiveLink( {
+			owner,
+			repo,
+			archive_format: 'tarball',
+			ref:            pushConfig.commit,
+		});
+		const archiveURL = archiveURLResult.meta.location;
+
+		// Reset redirect config.
+		delete github.config.followRedirects;
+
+		const tarball = await downloadFile( archiveURL, filename );
+
+		try {
+			await pify( fs.mkdir )( extractDir );
+		} catch ( e ) {
+			// Ignore if it already exists.
+		}
+
+		const extracted = await tar.extract( {
+			cwd:   extractDir,
+			file:  tarball,
+			strip: 1,
+			filter: path => ! path.match( /\.(jpg|jpeg|png|gif|woff|swf|flv|fla|woff|svg|otf||ttf|eot|swc|xap)$/ ),
+		} );
+
+		// Delete the now-unneeded tarball.
+		fs.unlink( tarball, () => {} );
 	}
-
-	const extracted = await tar.extract( {
-		cwd:   extractDir,
-		file:  tarball,
-		strip: 1,
-		filter: path => ! path.match( /\.(jpg|jpeg|png|gif|woff|swf|flv|fla|woff|svg|otf||ttf|eot|swc|xap)$/ ),
-	} );
-
-	// Delete the now-unneeded tarball.
-	fs.unlink( tarball, () => {} );
 
 	// Now that we have the code, start linting!
 	const results = await Promise.all( linters.map( linter => linter( extractDir, pushConfig ) ) );
 
-	// Remove the temporary directory.
-	await pify( rimraf )( extractDir );
+	if ( ! allowReuse ) {
+		// Remove the temporary directory.
+		await pify( rimraf )( extractDir );
+	}
 
 	// Calculate totals across all tools.
 	const totals = results.reduce( ( totals, result ) => {
