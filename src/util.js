@@ -23,12 +23,12 @@ const createGist = async ( description, filename, content ) => {
 		return null;
 	}
 
-	const anonymousGithub = new githubApi();
-	anonymousGithub.authenticate( {
+	const gh = new githubApi();
+	gh.authenticate( {
 		type: 'token',
 		token: GIST_ACCESS_TOKEN
 	} );
-	const response = await anonymousGithub.gists.create( {
+	const response = await gh.gists.create( {
 		files: {
 			[ filename ]: { content },
 		},
