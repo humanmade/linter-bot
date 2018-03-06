@@ -1,5 +1,3 @@
-const githubApi = require( 'github' );
-
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
 const {
@@ -10,6 +8,7 @@ const {
 	formatWelcome
 } = require( './format' );
 const { compareRuns, getPreviousRun } = require( './review' );
+const { createGist } = require( './util' );
 
 const onAdd = async context => {
 	const { github, payload } = context;
@@ -33,15 +32,13 @@ const onAdd = async context => {
 			throw e;
 		}
 
-		const anonymousGithub = new githubApi();
-		const response = await anonymousGithub.gists.create( {
-			files: {
-				'linter-output.txt': { content: formatDetails( lintState ) },
-			},
-			public: false,
-			description: `${ owner }/${ repo.name } ${ branch.data.commit.sha }`,
-		} );
-		const body = formatWelcome( lintState, response.data.html_url );
+		const gistUrl = await createGist(
+			`${ owner }/${ repo.name } ${ branch.data.commit.sha }`,
+			'linter-output.txt',
+			formatDetails( lintState )
+		);
+
+		const body = formatWelcome( lintState, gistUrl );
 		const summary = formatSummary( lintState );
 		github.issues.create( {
 			owner,
@@ -92,16 +89,11 @@ const onPush = async context => {
 	// Generate a string for a gist with all messages.
 	let logUrl = '';
 	if ( ! lintState.passed ) {
-
-		const anonymousGithub = new githubApi();
-		const response = await anonymousGithub.gists.create( {
-			files: {
-				'linter-output.txt': { content: formatDetails( lintState ) },
-			},
-			public: false,
-			description: `${owner}/${repo} ${commit}`,
-		} );
-		logUrl = response.data.html_url;
+		logUrl = await createGist(
+			`${owner}/${repo} ${commit}`,
+			'linter-output.txt',
+			formatDetails( lintState )
+		);
 	}
 
 	setStatus(
