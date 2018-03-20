@@ -1,3 +1,5 @@
+const serializeError = require( 'serialize-error' );
+
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
 const {
@@ -78,16 +80,21 @@ const onPush = async context => {
 
 	const pushConfig = { commit, owner, repo };
 	let lintState;
+	let logUrl = '';
 	try {
 		lintState = await runForRepo( pushConfig, github );
 	} catch ( e ) {
 		console.log(e)
-		setStatus( 'error', `Could not run: ${ e }` );
+		logUrl = await createGist(
+			`${owner}/${repo} ${commit}`,
+			'linter-output.txt',
+			JSON.stringify( serializeError( e ), null, 2 )
+		);
+		setStatus( 'error', `Could not run: ${ e }`, logUrl );
 		throw e;
 	}
 
 	// Generate a string for a gist with all messages.
-	let logUrl = '';
 	if ( ! lintState.passed ) {
 		logUrl = await createGist(
 			`${owner}/${repo} ${commit}`,
