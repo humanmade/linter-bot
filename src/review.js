@@ -24,6 +24,7 @@ async function getPreviousRun( github, owner, repo, number ) {
 
 	return reviews
 		.filter( review => review.user.type === 'Bot' && ( review.user.login === 'hm-linter' || review.user.login === 'hm-linter-development' ) )
+		.reverse()
 		.map( review => metadata.parse( review.body ) )
 		.find( data => !! data );
 }
