@@ -1,3 +1,7 @@
+const githubApi = require( 'github' );
+
+const GIST_ACCESS_TOKEN = process.env.GIST_ACCESS_TOKEN || null;
+
 function combineLinters( results ) {
 	return results
 		.map( linter => linter.files )
@@ -13,6 +17,28 @@ function combineLinters( results ) {
 		}, {} );
 }
 
+const createGist = async ( description, filename, content ) => {
+	if ( ! GIST_ACCESS_TOKEN ) {
+		console.warn( 'Missing GIST_ACCESS_TOKEN for Gist creation' );
+		return null;
+	}
+
+	const gh = new githubApi();
+	gh.authenticate( {
+		type: 'token',
+		token: GIST_ACCESS_TOKEN
+	} );
+	const response = await gh.gists.create( {
+		files: {
+			[ filename ]: { content },
+		},
+		public: false,
+		description,
+	} );
+	return response.data.html_url;
+};
+
 module.exports = {
 	combineLinters,
+	createGist,
 };
