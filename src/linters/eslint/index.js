@@ -59,6 +59,7 @@ module.exports = codepath => {
 			if ( err.messageTemplate === 'no-config-found' ) {
 				// Try with default configuration.
 				const engine = new CLIEngine( { ...options, configFile: DEFAULT_CONFIG } );
+				console.log( 'Running eslint with default config on path', codepath );
 				output = engine.executeOnFiles( [ codepath ] );
 			} else {
 				console.log( err );

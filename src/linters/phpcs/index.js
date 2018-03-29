@@ -64,6 +64,7 @@ module.exports = codepath => {
 		};
 
 		return new Promise( ( resolve, reject ) => {
+			console.log( 'Spawning PHP process', args, opts );
 			const proc = child_process.spawn( 'php', args, opts );
 			let stdout = '';
 			let stderr = '';

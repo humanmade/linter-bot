@@ -63,7 +63,7 @@ module.exports = async ( pushConfig, github, allowReuse = false ) => {
 
 		// Reset redirect config.
 		delete github.config.followRedirects;
-
+		console.log( 'Downloadding archive', archiveURL );
 		const tarball = await downloadFile( archiveURL, filename );
 
 		try {
@@ -72,12 +72,14 @@ module.exports = async ( pushConfig, github, allowReuse = false ) => {
 			// Ignore if it already exists.
 		}
 
+		console.log( 'Extracting archive to dir' );
 		const extracted = await tar.extract( {
 			cwd:   extractDir,
 			file:  tarball,
 			strip: 1,
 			filter: path => ! path.match( /\.(jpg|jpeg|png|gif|woff|swf|flv|fla|woff|svg|otf||ttf|eot|swc|xap)$/ ),
 		} );
+		console.log( 'Completed extraction.' );
 
 		// Delete the now-unneeded tarball.
 		fs.unlink( tarball, () => {} );
