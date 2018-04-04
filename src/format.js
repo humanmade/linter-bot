@@ -139,8 +139,11 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 	}
 
 	if ( lintState.passed ) {
+		const body = `Linting successful, all issues fixed! :tada:`;
+		const withMetadata = body + metadata.serialize( lintState );
 		return {
-			body: `Linting successful, all issues fixed! :tada:`,
+			// Don't allow the body to overflow.
+			body: withMetadata.length < 65536 ? withMetadata : body,
 			event: 'APPROVE',
 		};
 	}
