@@ -1,4 +1,4 @@
-const githubApi = require( 'github' );
+const githubApi = require( '@octokit/rest' );
 
 const GIST_ACCESS_TOKEN = process.env.GIST_ACCESS_TOKEN || null;
 
