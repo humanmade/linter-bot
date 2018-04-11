@@ -21,7 +21,7 @@
     "dotenv": "^5.0.1"
   },
   "scripts": {
-    "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D && babel node_modules/probot --out-dir build/probot",
+    "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D",
     "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
     "build:composer": "cd build/linters/phpcs && composer install",
     "build:npm": "docker run --rm -v \"${PWD}\":/var/task lambci/lambda:build-nodejs8.10 npm install",
