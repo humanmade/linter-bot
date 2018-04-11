@@ -53,7 +53,7 @@ module.exports = codepath => {
 			PHPCS_PATH,
 			'--runtime-set',
 			'installed_paths',
-			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards',
+			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM',
 			`--standard=${standard}`,
 			'--report=json',
 			codepath
