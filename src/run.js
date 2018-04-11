@@ -21,24 +21,12 @@ const REPO_DIR = '/tmp/repos';
 	}
 } );
 
-const downloadFile = ( url, filename ) => {
+const saveDownloadedFile = ( buffer, filename ) => {
 	const downloadPath = path.join( DOWNLOAD_DIR, filename );
-	const handle = fs.createWriteStream( downloadPath );
-
 	return new Promise( ( resolve, reject ) => {
-		const httpHandle = https.get( url, resp => {
-			resp.pipe( handle );
-			handle.on( 'finish', () => {
-				handle.close( () => resolve( downloadPath ) );
-			} );
-		} );
-		httpHandle.on( 'error', err => {
-			fs.unlink( downloadPath );
-			return reject( err );
-		} );
-		handle.on( 'error', err => {
-			fs.unlink( downloadPath );
-			return reject( err );
+		const handle = fs.createWriteStream( downloadPath );
+		handle.end( buffer, () => {
+			handle.close( () => resolve( downloadPath ) );
 		} );
 	} );
 };
@@ -50,21 +38,16 @@ module.exports = async ( pushConfig, github, allowReuse = false ) => {
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
 
 	if ( ! allowReuse || ! fs.existsSync( extractDir ) ) {
-		// Don't follow redirects for this request.
-		github.config.followRedirects = false;
+		console.log( 'Downloading archive to', extractDir );
 
-		const archiveURLResult = await github.repos.getArchiveLink( {
+		const archive = await github.repos.getArchiveLink( {
 			owner,
 			repo,
 			archive_format: 'tarball',
 			ref:            pushConfig.commit,
 		});
-		const archiveURL = archiveURLResult.meta.location;
 
-		// Reset redirect config.
-		delete github.config.followRedirects;
-		console.log( 'Downloadding archive', archiveURL );
-		const tarball = await downloadFile( archiveURL, filename );
+		const tarball = await saveDownloadedFile( archive.data, filename );
 
 		try {
 			await pify( fs.mkdir )( extractDir );
