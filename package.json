@@ -3,6 +3,7 @@
   "dependencies": {
     "babel-polyfill": "6.16.0",
     "eslint": "^4.19.0",
+    "eslint-config-humanmade": "^0.4.0",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
     "probot": "^4.1.0",
@@ -23,7 +24,7 @@
   "scripts": {
     "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D",
     "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
-    "build:composer": "cd build/linters/phpcs && composer install",
+    "build:composer": "cd build/linters/phpcs && composer install && rm -r vendor/humanmade/coding-standards/node_modules",
     "build:npm": "docker run --rm -v \"${PWD}\":/var/task lambci/lambda:build-nodejs8.10 npm install",
     "build": "npm run build:babel && npm run build:composer && npm run build:bin && npm run build:npm",
     "deploy:check": "test -f bin/php && test -f private-key.pem",
