@@ -2,11 +2,7 @@ const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
 
-const EXTRA_MODULE_PATHS = [
-	path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', 'node_modules' ),
-	path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', 'packages' ),
-];
-const DEFAULT_CONFIG = path.join( __dirname, '..', 'phpcs', 'vendor', 'humanmade', 'coding-standards', '.eslintrc.yml' );
+const DEFAULT_CONFIG = require.resolve( 'eslint-config-humanmade' );
 
 const formatMessage = message => {
 	return {
@@ -43,11 +39,6 @@ module.exports = codepath => {
 		cwd: codepath,
 	};
 
-	// SUPER-HACK!
-	const prevPath = process.env.NODE_PATH;
-	process.env.NODE_PATH = EXTRA_MODULE_PATHS.join( path.delimiter );
-	Module._initPaths();
-
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
 
@@ -66,10 +57,6 @@ module.exports = codepath => {
 				throw err;
 			}
 		}
-
-		// Undo SUPER-HACK!
-		process.env.NODE_PATH = prevPath;
-		Module._initPaths();
 
 		resolve( formatOutput( output, codepath ) );
 	} );
