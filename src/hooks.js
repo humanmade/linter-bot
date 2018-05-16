@@ -287,6 +287,7 @@ const onUpdatePull = async context => {
 
 module.exports = {
 	onAdd,
+	onCheck,
 	onPush,
 	onOpenPull,
 	onUpdatePull,
