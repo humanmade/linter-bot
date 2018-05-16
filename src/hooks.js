@@ -3,6 +3,7 @@ const serializeError = require( 'serialize-error' );
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
 const {
+	formatAnnotations,
 	formatDetails,
 	formatReview,
 	formatReviewChange,
@@ -178,6 +179,7 @@ const onCheck = async context => {
 		{
 			title: lintState.passed ? 'All checks passed' : 'hmlinter checks failed',
 			summary: formatSummary( lintState ),
+			annotations: formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` ),
 		}
 	);
 

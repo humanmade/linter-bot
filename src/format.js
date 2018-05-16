@@ -171,6 +171,29 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 	return review;
 }
 
+const formatAnnotations = ( state, baseUrl ) => {
+	const allResults = combineLinters( state.results );
+
+	const annotations = [];
+	Object.keys( combined ).forEach( file => {
+		const comments = combined[ file ];
+		comments.forEach( comment => {
+			const url = `${ baseUrl }/${ file }`;
+			annotations.push( {
+				filename: file,
+				blob_href: '', // ?
+				start_line: comment.line,
+				end_line: comment.line,
+				message: comment.message,
+				warning_level: comment.severity === 'warning' ? 'warning' : 'failure',
+				raw_details: JSON.stringify( comment, null, 2 ),
+			} );
+		} );
+	} );
+
+	return annotations;
+};
+
 const formatWelcome = ( state, gistUrl ) => {
 	let body = `Hi there! Thanks for activating hm-linter on this repo.`
 	body += `\n\nTo start you off, [here's an initial lint report of the repo](${ gistUrl }).`;
