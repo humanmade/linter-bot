@@ -12,7 +12,7 @@
     "eslint-plugin-react": "^6.4.1",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
-    "probot": "^4.1.0",
+    "probot": "^6.1.0",
     "rimraf": "^2.6.2",
     "serialize-error": "^2.1.0",
     "smee-client": "^1.0.1",
