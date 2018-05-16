@@ -16,7 +16,7 @@ const probot = createProbot( {
 	id: 8936,
 	secret: 'development',
 	cert: cert,
-	port: 0,
+	port: process.env.PORT || 3000,
 	webhookProxy: 'https://smee.io/rpFoxbfDjkw5Srji',
 } );
 
