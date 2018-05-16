@@ -112,6 +112,78 @@ const onPush = async context => {
 	console.log( JSON.stringify( lintState, null, 2 ) );
 };
 
+const onCheck = async context => {
+	// Start a "build".
+	const { github, payload } = context;
+
+	const { head_branch, head_sha } = payload.check_suite;
+
+	const owner = payload.repository.owner.name;
+	const repo = payload.repository.name;
+
+	// Set up the build first.
+	const checkCreation = github.checks.create( {
+		owner,
+		repo,
+		name: 'hmlinter',
+		head_branch,
+		head_sha,
+		started_at: ( new Date() ).toISOString(),
+	} );
+
+	const completeRun = async ( conclusion, output ) => {
+		const runId = await checkCreation;
+		github.checks.update( {
+			owner,
+			repo,
+			name: 'hmlinter',
+			check_run_id: runId,
+
+			completed_at: ( new Date() ).toISOString(),
+			status: 'completed',
+			conclusion,
+			output
+		} );
+	};
+
+	const pushConfig = { commit: head_sha, owner, repo };
+	let lintState;
+	let logUrl = '';
+	try {
+		lintState = await runForRepo( pushConfig, github );
+	} catch ( e ) {
+		console.log(e)
+		completeRun(
+			'failure',
+			{
+				title: 'Failed to run hmlinter',
+				summary: `Could not run: ${ e }`,
+				output: JSON.stringify( serializeError( e ), null, 2 )
+			}
+		);
+		throw e;
+	}
+
+	// Generate a string for a gist with all messages.
+	if ( ! lintState.passed ) {
+		logUrl = await createGist(
+			`${owner}/${repo} ${head_sha}`,
+			'linter-output.txt',
+			formatDetails( lintState )
+		);
+	}
+
+	completeRun(
+		lintState.passed ? 'success' : 'failure',
+		{
+			title: lintState.passed ? 'All checks passed' : 'hmlinter checks failed',
+			summary: formatSummary( lintState ),
+		}
+	);
+
+	console.log( JSON.stringify( lintState, null, 2 ) );
+};
+
 const onOpenPull = async context => {
 	const { github, payload } = context;
 	const commit = payload.pull_request.head.sha;
