@@ -224,7 +224,7 @@ const onOpenPull = async context => {
 		commit_id: commit,
 		body:      body,
 		event,
-		comments,
+		// comments,
 	} );
 
 	// path, position, body
@@ -236,7 +236,7 @@ const onOpenPull = async context => {
 		commit_id: commit,
 		body:      body,
 		event,
-		comments:  comments,
+		// comments:  comments,
 	} );
 };
 
