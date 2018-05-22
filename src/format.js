@@ -209,6 +209,7 @@ const formatDetails = state => {
 };
 
 module.exports = {
+	formatAnnotations,
 	formatComparison,
 	formatDetails,
 	formatReview,
