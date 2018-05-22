@@ -123,27 +123,35 @@ const onCheck = async context => {
 	const repo = payload.repository.name;
 
 	// Set up the build first.
-	const checkCreation = github.checks.create( {
-		owner,
-		repo,
-		name: 'hmlinter',
-		head_branch,
-		head_sha,
-		started_at: ( new Date() ).toISOString(),
+	const checkCreation = github.request( {
+		method: 'POST',
+		url: `/repos/${owner}/${repo}/check-runs`,
+		headers: {
+			accept: 'application/vnd.github.antiope-preview+json',
+		},
+		input: {
+			name: 'hmlinter',
+			head_branch,
+			head_sha,
+			started_at: ( new Date() ).toISOString(),
+		},
 	} );
 
 	const completeRun = async ( conclusion, output ) => {
-		const runId = await checkCreation;
-		github.checks.update( {
-			owner,
-			repo,
-			name: 'hmlinter',
-			check_run_id: runId,
+		const runResult = await checkCreation;
 
-			completed_at: ( new Date() ).toISOString(),
-			status: 'completed',
-			conclusion,
-			output
+		github.request( {
+			method: 'PATCH',
+			url: `/repos/${ owner }/${ repo }/check-runs/${ runResult.data.id }`,
+			headers: {
+				accept: 'application/vnd.github.antiope-preview+json',
+			},
+			input: {
+				completed_at: ( new Date() ).toISOString(),
+				status: 'completed',
+				conclusion,
+				output,
+			}
 		} );
 	};
 
