@@ -119,7 +119,7 @@ const onCheck = async context => {
 
 	const { head_branch, head_sha } = payload.check_suite;
 
-	const owner = payload.repository.owner.name;
+	const owner = payload.repository.owner.login;
 	const repo = payload.repository.name;
 
 	// Set up the build first.
