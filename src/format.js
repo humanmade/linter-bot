@@ -172,7 +172,7 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 }
 
 const formatAnnotations = ( state, baseUrl ) => {
-	const allResults = combineLinters( state.results );
+	const combined = combineLinters( state.results );
 
 	const annotations = [];
 	Object.keys( combined ).forEach( file => {
