@@ -159,15 +159,6 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 		event: 'REQUEST_CHANGES',
 	};
 
-	// Format comments if there are any to make.
-	if ( Object.keys( comparison.newIssues ).length > 0 ) {
-		const files = resultsByFile( comparison.newIssues );
-		const { comments } = formatComments( files, mapping );
-		if ( comments.length > 0 ) {
-			review.comments = comments;
-		}
-	}
-
 	return review;
 }
 
