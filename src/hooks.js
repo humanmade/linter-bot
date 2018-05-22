@@ -173,7 +173,6 @@ const onCheck = async context => {
 
 	const pushConfig = { commit: head_sha, owner, repo };
 	let lintState;
-	let logUrl = '';
 	try {
 		lintState = await runForRepo( pushConfig, github );
 	} catch ( e ) {
@@ -189,36 +188,37 @@ const onCheck = async context => {
 		throw e;
 	}
 
-	// Generate a string for a gist with all messages.
-	if ( ! lintState.passed ) {
-		logUrl = await createGist(
-			`${owner}/${repo} ${head_sha}`,
-			'linter-output.txt',
-			formatDetails( lintState )
+	if ( lintState.passed ) {
+		completeRun(
+			'success',
+			{
+				title: 'All checks passed',
+				summary: formatSummary( lintState ),
+			}
+		);
+	} else {
+		const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` );
+
+		// Push annotations 50 at a time (and send the leftovers with the completion).
+		const annotationGroups = _chunk( annotations, 50 );
+		const lastGroup = annotationGroups.pop();
+		await Promise.all( annotationGroups.map( chunk => {
+			return updateRun( {
+				title: 'Checking…',
+				summary: '',
+				annotations: chunk,
+			} );
+		} ) );
+
+		completeRun(
+			'failure',
+			{
+				title: 'hmlinter checks failed',
+				summary: formatSummary( lintState ),
+				annotations: lastGroup,
+			}
 		);
 	}
-
-	const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` );
-
-	// Push annotations 50 at a time (and send the leftovers with the completion).
-	const annotationGroups = _chunk( annotations, 50 );
-	const lastGroup = annotationGroups.pop();
-	await Promise.all( annotationGroups.map( chunk => {
-		return updateRun( {
-			title: 'Checking…',
-			summary: '',
-			annotations: chunk,
-		} );
-	} ) );
-
-	completeRun(
-		lintState.passed ? 'success' : 'failure',
-		{
-			title: lintState.passed ? 'All checks passed' : 'hmlinter checks failed',
-			summary: formatSummary( lintState ),
-			annotations: lastGroup,
-		}
-	);
 
 	console.log( JSON.stringify( lintState, null, 2 ) );
 };
