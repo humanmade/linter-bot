@@ -1,3 +1,4 @@
+const _chunk = require( 'lodash.chunk' );
 const serializeError = require( 'serialize-error' );
 
 const runForRepo = require( './run.js' );
@@ -137,6 +138,21 @@ const onCheck = async context => {
 		},
 	} );
 
+	const updateRun = async output => {
+		const runResult = await checkCreation;
+
+		github.request( {
+			method: 'PATCH',
+			url: `/repos/${ owner }/${ repo }/check-runs/${ runResult.data.id }`,
+			headers: {
+				accept: 'application/vnd.github.antiope-preview+json',
+			},
+			input: {
+				output,
+			}
+		} );
+	};
+
 	const completeRun = async ( conclusion, output ) => {
 		const runResult = await checkCreation;
 
@@ -182,12 +198,25 @@ const onCheck = async context => {
 		);
 	}
 
+	const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` );
+
+	// Push annotations 50 at a time (and send the leftovers with the completion).
+	const annotationGroups = _chunk( annotations, 50 );
+	const lastGroup = annotationGroups.pop();
+	await Promise.all( annotationGroups.map( chunk => {
+		return updateRun( {
+			title: 'Checking…',
+			summary: '',
+			annotations: chunk,
+		} );
+	} ) );
+
 	completeRun(
 		lintState.passed ? 'success' : 'failure',
 		{
 			title: lintState.passed ? 'All checks passed' : 'hmlinter checks failed',
 			summary: formatSummary( lintState ),
-			annotations: formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` ),
+			annotations: lastGroup,
 		}
 	);
 
