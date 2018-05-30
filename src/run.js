@@ -55,7 +55,7 @@ const downloadRepo = async ( extractDir, pushConfig, github ) => {
 	fs.unlink( tarball, () => {} );
 };
 
-module.exports = async ( pushConfig, github, allowReuse = false ) => {
+module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
 
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
