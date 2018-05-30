@@ -7,9 +7,9 @@ const tar = require( 'tar' );
 
 const realpath = pify( fs.realpath );
 
-const linters = require( './linters' );
+const getLinters = require( './linters' );
+const { DOWNLOAD_DIR, saveDownloadedFile } = require( './util' );
 
-const DOWNLOAD_DIR = '/tmp/downloads';
 const REPO_DIR = '/tmp/repos';
 
 [ DOWNLOAD_DIR, REPO_DIR ].forEach( dir => {
@@ -20,16 +20,6 @@ const REPO_DIR = '/tmp/repos';
 		console.log( e );
 	}
 } );
-
-const saveDownloadedFile = ( buffer, filename ) => {
-	const downloadPath = path.join( DOWNLOAD_DIR, filename );
-	return new Promise( ( resolve, reject ) => {
-		const handle = fs.createWriteStream( downloadPath );
-		handle.end( buffer, () => {
-			handle.close( () => resolve( downloadPath ) );
-		} );
-	} );
-};
 
 const downloadRepo = async ( extractDir, pushConfig, github ) => {
 	const { commit, owner, repo } = pushConfig;
