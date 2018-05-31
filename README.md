@@ -34,6 +34,34 @@ See the [HM Coding standards](https://github.com/humanmade/coding-standards) doc
 **Note:** Custom configuration can only use rules/standards which hm-linter has available. This includes the HM Coding Standards as well as any dependencies of it (such as the WP Coding Standards).
 
 
+## Configuration
+
+By default, hmlinter will use the latest version of the Human Made coding standards. You can configure it to use an older or fixed version by creating a `.github/hmlinter.yml` file. This file should look like:
+
+```yaml
+# GLOBAL SETTINGS
+
+# By default, the version is set to "latest". This can be set to any version
+# >=0.4.2, but you MUST include the full version number.
+version: latest
+
+# PER-STANDARD SETTINGS
+phpcs:
+    # Set to false to disable phpcs
+    enabled: true
+
+    # Set to "inherit" to use the global version, "latest" for the latest
+    # version, or a specific full version number.
+    version: inherit
+
+eslint:
+    enabled: true
+    version: inherit
+```
+
+Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is available as a convenient shorthand for the latest published version, but note that this will be updated and may cause your code to fail future checks.
+
+
 ## Development
 
 hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 6.10.
