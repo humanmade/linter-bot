@@ -6,7 +6,6 @@ const CONFIG_NAMES = [
 	'phpcs.xml',
 	'phpcs.ruleset.xml',
 ];
-const DEFAULT_CONFIG = path.join( __dirname, 'vendor', 'humanmade', 'coding-standards' );
 
 const formatMessage = message => {
 	const details = `<details><summary>Error details</summary><code>${message.source}</code> from phpcs</details>`;
@@ -47,20 +46,20 @@ module.exports = standardPath => codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || standardPath;
+		const standard = rulesetFiles.find( file => !! file ) || `${ standardPath }/HM`;
 
 		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
 			'--runtime-set',
 			'installed_paths',
-			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM',
+			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer',
 			`--standard=${standard}`,
 			'--report=json',
 			codepath
 		];
 		const opts = {
-			cwd: __dirname,
+			cwd: standardPath,
 			env: process.env,
 		};
 
