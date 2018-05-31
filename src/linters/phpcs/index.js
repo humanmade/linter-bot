@@ -36,7 +36,7 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
-module.exports = codepath => {
+module.exports = standardPath => codepath => {
 	// Detect a ruleset file if we can, otherwise use default.
 	return Promise.all( CONFIG_NAMES.map( filename => {
 		return new Promise( resolve => {
@@ -46,7 +46,7 @@ module.exports = codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || DEFAULT_CONFIG;
+		const standard = rulesetFiles.find( file => !! file ) || standardPath;
 
 		// const standard = 'PSR2'; //...
 		const args = [

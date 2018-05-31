@@ -1,3 +1,6 @@
+const fs = require( 'fs' );
+const path = require( 'path' );
+
 const githubApi = require( '@octokit/rest' );
 
 const DOWNLOAD_DIR = '/tmp/downloads';

@@ -58,6 +58,9 @@ const downloadRepo = async ( extractDir, pushConfig, github ) => {
 module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
 
+	// Start setting up the linters.
+	const linterPromise = getLinters( config );
+
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
 
 	if ( ! allowReuse || ! fs.existsSync( extractDir ) ) {
@@ -65,6 +68,7 @@ module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	}
 
 	// Now that we have the code, start linting!
+	const linters = await linterPromise;
 	const results = await Promise.all( linters.map( linter => linter( extractDir, pushConfig ) ) );
 
 	if ( ! allowReuse ) {

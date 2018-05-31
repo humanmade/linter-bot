@@ -2,8 +2,6 @@ const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
 
-const DEFAULT_CONFIG = require.resolve( 'eslint-config-humanmade' );
-
 const formatMessage = message => {
 	return {
 		line:     message.line,
@@ -34,7 +32,7 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
-module.exports = codepath => {
+module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,
 	};
@@ -49,7 +47,7 @@ module.exports = codepath => {
 		} catch ( err ) {
 			if ( err.messageTemplate === 'no-config-found' ) {
 				// Try with default configuration.
-				const engine = new CLIEngine( { ...options, configFile: DEFAULT_CONFIG } );
+				const engine = new CLIEngine( { ...options, configFile: `${ standardPath }/index.js` } );
 				console.log( 'Running eslint with default config on path', codepath );
 				output = engine.executeOnFiles( [ codepath ] );
 			} else {
