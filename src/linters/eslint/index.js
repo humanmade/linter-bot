@@ -37,6 +37,11 @@ module.exports = standardPath => codepath => {
 		cwd: codepath,
 	};
 
+	// SUPER-HACK!
+	const prevPath = process.env.NODE_PATH;
+	process.env.NODE_PATH = `${ standardPath }/node_modules`;
+	Module._initPaths();
+
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
 
@@ -55,6 +60,10 @@ module.exports = standardPath => codepath => {
 				throw err;
 			}
 		}
+
+		// Undo SUPER-HACK!
+		process.env.NODE_PATH = prevPath;
+		Module._initPaths();
 
 		resolve( formatOutput( output, codepath ) );
 	} );
