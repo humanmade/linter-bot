@@ -12,7 +12,6 @@ const available = {
 
 const STANDARDS_DIR = '/tmp/hmlinter-standards';
 const BASE_URL = 'https://make.hmn.md/hmlinter/standards';
-const LATEST_VERSION = '0.5.0';
 
 const httpGet = ( ...args ) => {
 	return new Promise( ( resolve, reject ) => {
