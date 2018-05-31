@@ -2,7 +2,6 @@ const child_process = require( 'child_process' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const PHPCS_PATH = path.join( __dirname, 'vendor', 'squizlabs', 'php_codesniffer', 'bin', 'phpcs' );
 const CONFIG_NAMES = [
 	'phpcs.xml',
 	'phpcs.ruleset.xml',
@@ -37,6 +36,8 @@ const formatOutput = ( data, codepath ) => {
 };
 
 module.exports = standardPath => codepath => {
+	const phpcsPath = path.join( standardPath, 'vendor', 'bin', 'phpcs' );
+
 	// Detect a ruleset file if we can, otherwise use default.
 	return Promise.all( CONFIG_NAMES.map( filename => {
 		return new Promise( resolve => {
@@ -50,7 +51,7 @@ module.exports = standardPath => codepath => {
 
 		// const standard = 'PSR2'; //...
 		const args = [
-			PHPCS_PATH,
+			phpcsPath,
 			'--runtime-set',
 			'installed_paths',
 			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM',
