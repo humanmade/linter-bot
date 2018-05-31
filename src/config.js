@@ -1,10 +1,10 @@
 const DEFAULT_CONFIG = {
 	version: 'latest',
-	php: {
+	phpcs: {
 		enabled: true,
 		version: 'inherit',
 	},
-	js: {
+	eslint: {
 		enabled: true,
 		version: 'inherit',
 	},
