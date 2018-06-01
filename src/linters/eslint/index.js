@@ -38,6 +38,11 @@ module.exports = standardPath => codepath => {
 	};
 
 	// SUPER-HACK!
+	// We need to use node_modules from the standard directory, but because
+	// we're not invoking eslint over the CLI, we can't change where `require()`
+	// loads modules from unless we override the env and re-init Module.
+	//
+	// This is technically Node-internal behaviour, but it works.
 	const prevPath = process.env.NODE_PATH;
 	process.env.NODE_PATH = `${ standardPath }/node_modules`;
 	Module._initPaths();
