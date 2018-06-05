@@ -1,9 +1,11 @@
+const _chunk = require( 'lodash.chunk' );
 const serializeError = require( 'serialize-error' );
 
 const getConfig = require( './config' );
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
 const {
+	formatAnnotations,
 	formatDetails,
 	formatReview,
 	formatReviewChange,
@@ -113,6 +115,115 @@ const onPush = async context => {
 	console.log( JSON.stringify( lintState, null, 2 ) );
 };
 
+const onCheck = async context => {
+	// Start a "build".
+	const { github, payload } = context;
+
+	const { head_branch, head_sha } = payload.check_suite || payload.check_run.check_suite;
+
+	const owner = payload.repository.owner.login;
+	const repo = payload.repository.name;
+
+	// Set up the build first.
+	const checkCreation = github.request( {
+		method: 'POST',
+		url: `/repos/${owner}/${repo}/check-runs`,
+		headers: {
+			accept: 'application/vnd.github.antiope-preview+json',
+		},
+		input: {
+			name: 'hmlinter',
+			head_branch,
+			head_sha,
+			started_at: ( new Date() ).toISOString(),
+		},
+	} );
+
+	const updateRun = async output => {
+		const runResult = await checkCreation;
+
+		github.request( {
+			method: 'PATCH',
+			url: `/repos/${ owner }/${ repo }/check-runs/${ runResult.data.id }`,
+			headers: {
+				accept: 'application/vnd.github.antiope-preview+json',
+			},
+			input: {
+				output,
+			}
+		} );
+	};
+
+	const completeRun = async ( conclusion, output ) => {
+		const runResult = await checkCreation;
+
+		github.request( {
+			method: 'PATCH',
+			url: `/repos/${ owner }/${ repo }/check-runs/${ runResult.data.id }`,
+			headers: {
+				accept: 'application/vnd.github.antiope-preview+json',
+			},
+			input: {
+				completed_at: ( new Date() ).toISOString(),
+				status: 'completed',
+				conclusion,
+				output,
+			}
+		} );
+	};
+
+	const pushConfig = { commit: head_sha, owner, repo };
+	let lintState;
+	try {
+		lintState = await runForRepo( pushConfig, github );
+	} catch ( e ) {
+		console.log(e)
+		completeRun(
+			'failure',
+			{
+				title: 'Failed to run hmlinter',
+				summary: `Could not run: ${ e }`,
+				output: JSON.stringify( serializeError( e ), null, 2 )
+			}
+		);
+		throw e;
+	}
+
+	if ( lintState.passed ) {
+		completeRun(
+			'success',
+			{
+				title: 'All checks passed',
+				summary: formatSummary( lintState ),
+			}
+		);
+	} else {
+		const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` );
+
+		// Push annotations 50 at a time (and send the leftovers with the completion).
+		const annotationGroups = _chunk( annotations, 50 );
+		const lastGroup = annotationGroups.pop();
+		await Promise.all( annotationGroups.map( chunk => {
+			return updateRun( {
+				title: 'Checking…',
+				summary: '',
+				annotations: chunk,
+			} );
+		} ) );
+
+		completeRun(
+			'failure',
+			{
+				title: 'hmlinter checks failed',
+				summary: formatSummary( lintState ),
+				annotations: lastGroup,
+			}
+		);
+	}
+
+	console.log( JSON.stringify( lintState, null, 2 ) );
+};
+
 const onOpenPull = async context => {
 	const { github, payload } = context;
 	const commit = payload.pull_request.head.sha;
@@ -143,7 +254,7 @@ const onOpenPull = async context => {
 		return;
 	}
 
-	const { body, comments, event } = formatReview( lintState, diffMapping );
+	const { body, event } = formatReview( lintState, diffMapping );
 	console.log( {
 		owner,
 		repo,
@@ -151,7 +262,6 @@ const onOpenPull = async context => {
 		commit_id: commit,
 		body:      body,
 		event,
-		comments,
 	} );
 
 	// path, position, body
@@ -163,7 +273,6 @@ const onOpenPull = async context => {
 		commit_id: commit,
 		body:      body,
 		event,
-		comments:  comments,
 	} );
 };
 
@@ -214,6 +323,7 @@ const onUpdatePull = async context => {
 
 module.exports = {
 	onAdd,
+	onCheck,
 	onPush,
 	onOpenPull,
 	onUpdatePull,

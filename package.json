@@ -2,6 +2,7 @@
   "private": true,
   "dependencies": {
     "babel-polyfill": "6.16.0",
+    "lodash.chunk": "^4.2.0",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
     "probot": "^6.1.0",

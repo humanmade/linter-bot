@@ -159,17 +159,31 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 		event: 'REQUEST_CHANGES',
 	};
 
-	// Format comments if there are any to make.
-	if ( Object.keys( comparison.newIssues ).length > 0 ) {
-		const files = resultsByFile( comparison.newIssues );
-		const { comments } = formatComments( files, mapping );
-		if ( comments.length > 0 ) {
-			review.comments = comments;
-		}
-	}
-
 	return review;
 }
+
+const formatAnnotations = ( state, baseUrl ) => {
+	const combined = combineLinters( state.results );
+
+	const annotations = [];
+	Object.keys( combined ).forEach( file => {
+		const comments = combined[ file ];
+		comments.forEach( comment => {
+			const url = `${ baseUrl }/${ file }`;
+			annotations.push( {
+				filename: file,
+				blob_href: '', // ?
+				start_line: comment.line,
+				end_line: comment.line,
+				message: comment.message,
+				warning_level: comment.severity === 'warning' ? 'warning' : 'failure',
+				raw_details: JSON.stringify( comment, null, 2 ),
+			} );
+		} );
+	} );
+
+	return annotations;
+};
 
 const formatWelcome = ( state, gistUrl ) => {
 	let body = `Hi there! Thanks for activating hm-linter on this repo.`
@@ -186,6 +200,7 @@ const formatDetails = state => {
 };
 
 module.exports = {
+	formatAnnotations,
 	formatComparison,
 	formatDetails,
 	formatReview,
