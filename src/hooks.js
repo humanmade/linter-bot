@@ -175,7 +175,7 @@ const onCheck = async context => {
 	const pushConfig = { commit: head_sha, owner, repo };
 	let lintState;
 	try {
-		lintState = await runForRepo( pushConfig, github );
+		lintState = await runForRepo( pushConfig, getConfig( context ), github );
 	} catch ( e ) {
 		console.log(e)
 		completeRun(
