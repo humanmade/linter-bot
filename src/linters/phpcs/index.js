@@ -2,12 +2,10 @@ const child_process = require( 'child_process' );
 const fs = require( 'fs' );
 const path = require( 'path' );
 
-const PHPCS_PATH = path.join( __dirname, 'vendor', 'squizlabs', 'php_codesniffer', 'bin', 'phpcs' );
 const CONFIG_NAMES = [
 	'phpcs.xml',
 	'phpcs.ruleset.xml',
 ];
-const DEFAULT_CONFIG = path.join( __dirname, 'vendor', 'humanmade', 'coding-standards' );
 
 const formatMessage = message => {
 	const details = `<details><summary>Error details</summary><code>${message.source}</code> from phpcs</details>`;
@@ -36,7 +34,9 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
-module.exports = codepath => {
+module.exports = standardPath => codepath => {
+	const phpcsPath = path.join( standardPath, 'vendor', 'bin', 'phpcs' );
+
 	// Detect a ruleset file if we can, otherwise use default.
 	return Promise.all( CONFIG_NAMES.map( filename => {
 		return new Promise( resolve => {
@@ -46,20 +46,20 @@ module.exports = codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || DEFAULT_CONFIG;
+		const standard = rulesetFiles.find( file => !! file ) || `${ standardPath }/HM`;
 
 		// const standard = 'PSR2'; //...
 		const args = [
-			PHPCS_PATH,
+			phpcsPath,
 			'--runtime-set',
 			'installed_paths',
-			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM',
+			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer',
 			`--standard=${standard}`,
 			'--report=json',
 			codepath
 		];
 		const opts = {
-			cwd: __dirname,
+			cwd: standardPath,
 			env: process.env,
 		};
 

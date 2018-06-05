@@ -1,5 +1,9 @@
+const fs = require( 'fs' );
+const path = require( 'path' );
+
 const githubApi = require( '@octokit/rest' );
 
+const DOWNLOAD_DIR = '/tmp/downloads';
 const GIST_ACCESS_TOKEN = process.env.GIST_ACCESS_TOKEN || null;
 
 function combineLinters( results ) {
@@ -38,7 +42,19 @@ const createGist = async ( description, filename, content ) => {
 	return response.data.html_url;
 };
 
+const saveDownloadedFile = ( buffer, filename ) => {
+	const downloadPath = path.join( DOWNLOAD_DIR, filename );
+	return new Promise( ( resolve, reject ) => {
+		const handle = fs.createWriteStream( downloadPath );
+		handle.end( buffer, () => {
+			handle.close( () => resolve( downloadPath ) );
+		} );
+	} );
+};
+
 module.exports = {
+	DOWNLOAD_DIR,
 	combineLinters,
 	createGist,
+	saveDownloadedFile,
 };

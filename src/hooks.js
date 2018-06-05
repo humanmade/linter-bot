@@ -1,6 +1,7 @@
 const _chunk = require( 'lodash.chunk' );
 const serializeError = require( 'serialize-error' );
 
+const getConfig = require( './config' );
 const runForRepo = require( './run.js' );
 const { getDiffMapping } = require( './diff' );
 const {
@@ -30,7 +31,7 @@ const onAdd = async context => {
 		};
 		let lintState;
 		try {
-			lintState = await runForRepo( pushConfig, github );
+			lintState = await runForRepo( pushConfig, getConfig( context ), github );
 		} catch ( e ) {
 			console.log( e );
 			throw e;
@@ -84,7 +85,7 @@ const onPush = async context => {
 	let lintState;
 	let logUrl = '';
 	try {
-		lintState = await runForRepo( pushConfig, github );
+		lintState = await runForRepo( pushConfig, getConfig( context ), github );
 	} catch ( e ) {
 		console.log(e)
 		logUrl = await createGist(
@@ -235,7 +236,7 @@ const onOpenPull = async context => {
 	let diffMapping, lintState;
 	try {
 		[ lintState, diffMapping ] = await Promise.all([
-			runForRepo( pushConfig, github ),
+			runForRepo( pushConfig, getConfig( context ), github ),
 			getDiffMapping( pushConfig, payload.number, github ),
 		]);
 	} catch ( e ) {
@@ -287,7 +288,7 @@ const onUpdatePull = async context => {
 	let diffMapping, lintState, previousState;
 	try {
 		[ lintState, diffMapping, previousState ] = await Promise.all([
-			runForRepo( pushConfig, github ),
+			runForRepo( pushConfig, getConfig( context ), github ),
 			getDiffMapping( pushConfig, payload.number, github ),
 			getPreviousRun( github, owner, repo, payload.number ),
 		]);

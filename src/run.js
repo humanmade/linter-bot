@@ -7,9 +7,9 @@ const tar = require( 'tar' );
 
 const realpath = pify( fs.realpath );
 
-const linters = require( './linters' );
+const getLinters = require( './linters' );
+const { DOWNLOAD_DIR, saveDownloadedFile } = require( './util' );
 
-const DOWNLOAD_DIR = '/tmp/downloads';
 const REPO_DIR = '/tmp/repos';
 
 [ DOWNLOAD_DIR, REPO_DIR ].forEach( dir => {
@@ -20,16 +20,6 @@ const REPO_DIR = '/tmp/repos';
 		console.log( e );
 	}
 } );
-
-const saveDownloadedFile = ( buffer, filename ) => {
-	const downloadPath = path.join( DOWNLOAD_DIR, filename );
-	return new Promise( ( resolve, reject ) => {
-		const handle = fs.createWriteStream( downloadPath );
-		handle.end( buffer, () => {
-			handle.close( () => resolve( downloadPath ) );
-		} );
-	} );
-};
 
 const downloadRepo = async ( extractDir, pushConfig, github ) => {
 	const { commit, owner, repo } = pushConfig;
@@ -65,8 +55,11 @@ const downloadRepo = async ( extractDir, pushConfig, github ) => {
 	fs.unlink( tarball, () => {} );
 };
 
-module.exports = async ( pushConfig, github, allowReuse = false ) => {
+module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
+
+	// Start setting up the linters.
+	const linterPromise = getLinters( config );
 
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
 
@@ -75,6 +68,7 @@ module.exports = async ( pushConfig, github, allowReuse = false ) => {
 	}
 
 	// Now that we have the code, start linting!
+	const linters = await linterPromise;
 	const results = await Promise.all( linters.map( linter => linter( extractDir, pushConfig ) ) );
 
 	if ( ! allowReuse ) {

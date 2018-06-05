@@ -2,8 +2,6 @@ const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
 
-const DEFAULT_CONFIG = require.resolve( 'eslint-config-humanmade' );
-
 const formatMessage = message => {
 	return {
 		line:     message.line,
@@ -34,10 +32,20 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
-module.exports = codepath => {
+module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,
 	};
+
+	// SUPER-HACK!
+	// We need to use node_modules from the standard directory, but because
+	// we're not invoking eslint over the CLI, we can't change where `require()`
+	// loads modules from unless we override the env and re-init Module.
+	//
+	// This is technically Node-internal behaviour, but it works.
+	const prevPath = process.env.NODE_PATH;
+	process.env.NODE_PATH = `${ standardPath }/node_modules`;
+	Module._initPaths();
 
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
@@ -49,7 +57,7 @@ module.exports = codepath => {
 		} catch ( err ) {
 			if ( err.messageTemplate === 'no-config-found' ) {
 				// Try with default configuration.
-				const engine = new CLIEngine( { ...options, configFile: DEFAULT_CONFIG } );
+				const engine = new CLIEngine( { ...options, configFile: `${ standardPath }/index.js` } );
 				console.log( 'Running eslint with default config on path', codepath );
 				output = engine.executeOnFiles( [ codepath ] );
 			} else {
@@ -57,6 +65,10 @@ module.exports = codepath => {
 				throw err;
 			}
 		}
+
+		// Undo SUPER-HACK!
+		process.env.NODE_PATH = prevPath;
+		Module._initPaths();
 
 		resolve( formatOutput( output, codepath ) );
 	} );
