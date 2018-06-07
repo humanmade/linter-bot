@@ -51,6 +51,7 @@ module.exports = standardPath => codepath => {
 		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
+			'-q',
 			'--runtime-set',
 			'installed_paths',
 			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer',
