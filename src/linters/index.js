@@ -1,5 +1,6 @@
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 const https = require( 'https' );
+const os = require( 'os' );
 const pify = require( 'pify' );
 const tar = require( 'tar' );
 
@@ -10,7 +11,8 @@ const available = {
 	phpcs: require( './phpcs' ),
 };
 
-const STANDARDS_DIR = '/tmp/hmlinter-standards';
+const tmpdir = os.tmpdir();
+const STANDARDS_DIR = `${tmpdir}/hmlinter-standards`;
 const BASE_URL = 'https://make.hmn.md/hmlinter/standards';
 
 const httpGet = ( ...args ) => {
@@ -29,7 +31,7 @@ const httpGet = ( ...args ) => {
 
 const downloadFile = async ( url, filename ) => {
 	if ( ! fs.existsSync( STANDARDS_DIR ) ) {
-		await pify( fs.mkdir )( STANDARDS_DIR );
+		await pify( fs.mkdirs )( STANDARDS_DIR );
 	}
 
 	console.log( `Fetching ${ url }` );
@@ -54,10 +56,10 @@ const prepareLinter = async ( linter, version ) => {
 	console.log( `Extracting standard to ${ directory }` );
 
 	if ( ! fs.existsSync( directory ) ) {
-		await pify( fs.mkdir )( directory );
+		await pify( fs.mkdirs )( directory );
 	}
 
-	const extracted = await tar.extract( {
+	await tar.extract( {
 		cwd: directory,
 		file: tarball,
 	} );

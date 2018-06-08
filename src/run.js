@@ -1,5 +1,6 @@
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 const https = require( 'https' );
+const os = require( 'os' );
 const path = require( 'path' );
 const pify = require( 'pify' );
 const rimraf = require( 'rimraf' );
@@ -10,11 +11,12 @@ const realpath = pify( fs.realpath );
 const getLinters = require( './linters' );
 const { DOWNLOAD_DIR, saveDownloadedFile } = require( './util' );
 
-const REPO_DIR = '/tmp/repos';
+const tmpdir = os.tmpdir();
+const REPO_DIR = `${tmpdir}/repos`;
 
 [ DOWNLOAD_DIR, REPO_DIR ].forEach( dir => {
 	try {
-		fs.mkdir( dir, () => {} );
+		fs.mkdirs( dir, () => {} );
 	}
 	catch ( e ) {
 		console.log( e );
@@ -37,7 +39,7 @@ const downloadRepo = async ( extractDir, pushConfig, github ) => {
 	const tarball = await saveDownloadedFile( archive.data, filename );
 
 	try {
-		await pify( fs.mkdir )( extractDir );
+		await pify( fs.mkdirs )( extractDir );
 	} catch ( e ) {
 		// Ignore if it already exists.
 	}
