@@ -46,7 +46,7 @@ module.exports = standardPath => codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || `${ standardPath }/HM`;
+		const standard = rulesetFiles.find( file => !! file ) || `vendor/humanmade/coding-standards`;
 
 		// const standard = 'PSR2'; //...
 		const args = [
