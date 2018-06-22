@@ -3,7 +3,10 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 
 const CONFIG_NAMES = [
+	'.phpcs.xml',
 	'phpcs.xml',
+	'.phpcs.xml.dist',
+	'phpcs.xml.dist',
 	'phpcs.ruleset.xml',
 ];
 
