@@ -1,3 +1,4 @@
+const probotUtil = require( '@humanmade/probot-util' );
 const fs = require( 'fs' );
 const https = require( 'https' );
 const path = require( 'path' );
@@ -8,52 +9,8 @@ const tar = require( 'tar' );
 const realpath = pify( fs.realpath );
 
 const getLinters = require( './linters' );
-const { DOWNLOAD_DIR, saveDownloadedFile } = require( './util' );
 
 const REPO_DIR = '/tmp/repos';
-
-[ DOWNLOAD_DIR, REPO_DIR ].forEach( dir => {
-	try {
-		fs.mkdir( dir, () => {} );
-	}
-	catch ( e ) {
-		console.log( e );
-	}
-} );
-
-const downloadRepo = async ( extractDir, pushConfig, github ) => {
-	const { commit, owner, repo } = pushConfig;
-
-	console.log( 'Downloading archive to', extractDir );
-
-	const filename = `${owner}-${repo}-${commit}.tar.gz`;
-	const archive = await github.repos.getArchiveLink( {
-		owner,
-		repo,
-		archive_format: 'tarball',
-		ref:            commit,
-	});
-
-	const tarball = await saveDownloadedFile( archive.data, filename );
-
-	try {
-		await pify( fs.mkdir )( extractDir );
-	} catch ( e ) {
-		// Ignore if it already exists.
-	}
-
-	console.log( 'Extracting archive to dir' );
-	const extracted = await tar.extract( {
-		cwd:   extractDir,
-		file:  tarball,
-		strip: 1,
-		filter: path => ! path.match( /\.(jpg|jpeg|png|gif|woff|swf|flv|fla|woff|svg|otf||ttf|eot|swc|xap)$/ ),
-	} );
-	console.log( 'Completed extraction.' );
-
-	// Delete the now-unneeded tarball.
-	fs.unlink( tarball, () => {} );
-};
 
 module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
@@ -61,10 +18,11 @@ module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	// Start setting up the linters.
 	const linterPromise = getLinters( config );
 
+	await probotUtil.file.ensureDirectory( REPO_DIR );
 	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
 
 	if ( ! allowReuse || ! fs.existsSync( extractDir ) ) {
-		await downloadRepo( extractDir, pushConfig, github );
+		await probotUtil.repo.download( extractDir, pushConfig, github );
 	}
 
 	// Now that we have the code, start linting!
