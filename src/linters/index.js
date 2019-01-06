@@ -13,6 +13,12 @@ const available = {
 const STANDARDS_DIR = '/tmp/hmlinter-standards';
 const BASE_URL = 'https://make.hmn.md/hmlinter/standards';
 
+/**
+ * Fetch a file with a given path.
+ *
+ * @param args Arguments available to https.get. See https://nodejs.org/api/https.html#https_https_get_url_options_callback
+ * @returns {Promise<any>}
+ */
 const httpGet = ( ...args ) => {
 	return new Promise( ( resolve, reject ) => {
 		const req = https.get( ...args, res => {
@@ -27,6 +33,13 @@ const httpGet = ( ...args ) => {
 	} );
 };
 
+/**
+ * Download an external standards file.
+ *
+ * @param {String} url      URL of the file to download.
+ * @param {String} filename Local filename to save to.
+ * @returns {Promise<*>}
+ */
 const downloadFile = async ( url, filename ) => {
 	if ( ! fs.existsSync( STANDARDS_DIR ) ) {
 		await pify( fs.mkdir )( STANDARDS_DIR );
@@ -43,6 +56,13 @@ const downloadFile = async ( url, filename ) => {
 	return await saveDownloadedFile( res.body, filename );
 };
 
+/**
+ * Prepare a linter for use in parsing files.
+ *
+ * @param {String} linter  Which linter to setup.
+ * @param {String} version Standards version to use.
+ * @returns {Promise<*>}
+ */
 const prepareLinter = async ( linter, version ) => {
 	const filename = `${ linter }-${ version }.tar.gz`;
 	const url = `${ BASE_URL }/${ filename }`;
@@ -68,6 +88,12 @@ const prepareLinter = async ( linter, version ) => {
 	return buildLinter( `${ directory }/` );
 };
 
+/**
+ * Run linters.
+ *
+ * @param {Promise} configPromise
+ * @returns {Promise<any[]>}
+ */
 module.exports = async configPromise => {
 	// Ensure we actually have the config.
 	const config = await configPromise;

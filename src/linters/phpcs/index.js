@@ -10,6 +10,12 @@ const CONFIG_NAMES = [
 	'phpcs.ruleset.xml',
 ];
 
+/**
+ * Format message data into a consistent format for usage in formatOutput.
+ *
+ * @param {Object} message Raw message data from PHPCS.
+ * @returns {Object}
+ */
 const formatMessage = message => {
 	const details = `<details><summary>Error details</summary><code>${message.source}</code> from phpcs</details>`;
 	const text = `${message.message}`;
@@ -23,6 +29,13 @@ const formatMessage = message => {
 	};
 };
 
+/**
+ * Organize all output from PHPCS for Linter ingestion.
+ *
+ * @param {Object} data     Warnings and errors from PHPCS.
+ * @param {String} codepath Path to the code getting linted.
+ * @returns {{files, totals: {warnings: *, errors: *}}}
+ */
 const formatOutput = ( data, codepath ) => {
 	const totals = {
 		errors:   data.totals.errors,
@@ -37,6 +50,12 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
+/**
+ * Run PHPCS linting.
+ *
+ * @param {String} standardPath Optional. Path to custom standard set.
+ * @returns {function(*=): Promise<any | never>}
+ */
 module.exports = standardPath => codepath => {
 	const phpcsPath = path.join( standardPath, 'vendor', 'bin', 'phpcs' );
 

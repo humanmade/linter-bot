@@ -2,6 +2,12 @@ const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
 
+/**
+ * Format message data into a consistent format for usage in formatOutput.
+ *
+ * @param {Object} message Raw message data from eslint.
+ * @returns {Object}
+ */
 const formatMessage = message => {
 	return {
 		line:     message.line,
@@ -12,6 +18,13 @@ const formatMessage = message => {
 	};
 };
 
+/**
+ * Organize all output from eslint for Linter ingestion.
+ *
+ * @param {Object} data     Warnings and errors from eslint.
+ * @param {String} codepath Path to the code getting linted.
+ * @returns {{files, totals: {warnings: *, errors: *}}}
+ */
 const formatOutput = ( data, codepath ) => {
 	const totals = {
 		errors:   data.errorCount,
@@ -32,6 +45,12 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
+/**
+ * Run eslint linting.
+ *
+ * @param {String} standardPath Optional. Path to custom standard set.
+ * @returns {function(*=): Promise<any>}
+ */
 module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,
