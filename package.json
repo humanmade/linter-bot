@@ -27,8 +27,12 @@
     "build": "npm run build:babel && npm run build:bin && npm run build:npm",
     "deploy:check": "test -f bin/php && test -f private-key.pem",
     "deploy:package": "zip --symlinks -9 -x lambda-function.zip -x \"src/*\" -r lambda-function *",
+    "deploy:package-dev": "npm run deploy:package && cp development.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
+    "deploy:package-production": "npm run deploy:package && cp production.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
     "deploy:push": "aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
-    "deploy": "npm run build && npm run deploy:check && npm run deploy:package && npm run deploy:push",
+    "deploy:push-dev": "aws lambda update-function-code --function-name hm-linter-development --region us-east-1 --zip-file fileb://lambda-function.zip",
+    "deploy": "npm run build && npm run deploy:check && npm run deploy:package-production && npm run deploy:push",
+    "deploy:dev": "npm run build && npm run deploy:check && npm run deploy:package-dev && npm run deploy:push-dev",
     "start": "node start-development.js",
     "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs8.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
   }
