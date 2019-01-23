@@ -70,7 +70,6 @@ To get started on development of hm-linter:
 
 1. Clone this repository
 2. `npm install` or `yarn install` the dependencies
-3. `cd src/linters/phpcs && composer install` to download the HM Coding Standards
 
 
 ### Testing
