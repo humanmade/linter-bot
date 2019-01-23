@@ -171,12 +171,11 @@ const formatAnnotations = ( state, baseUrl ) => {
 		comments.forEach( comment => {
 			const url = `${ baseUrl }/${ file }`;
 			annotations.push( {
-				filename: file,
-				blob_href: '', // ?
+				path: file,
 				start_line: comment.line,
 				end_line: comment.line,
 				message: comment.message,
-				warning_level: comment.severity === 'warning' ? 'warning' : 'failure',
+				annotation_level: comment.severity === 'warning' ? 'warning' : 'failure',
 				raw_details: JSON.stringify( comment, null, 2 ),
 			} );
 		} );
