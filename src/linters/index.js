@@ -1,9 +1,8 @@
+const probotUtil = require( '@humanmade/probot-util' );
 const fs = require( 'fs' );
 const https = require( 'https' );
 const pify = require( 'pify' );
 const tar = require( 'tar' );
-
-const { saveDownloadedFile } = require( '../util' );
 
 const available = {
 	eslint: require( './eslint' ),
@@ -40,7 +39,7 @@ const downloadFile = async ( url, filename ) => {
 	}
 
 	console.log( `Saving to ${ filename }` );
-	return await saveDownloadedFile( res.body, filename );
+	return await probotUtil.file.saveDownloadedFile( res.body, filename );
 };
 
 const prepareLinter = async ( linter, version ) => {
