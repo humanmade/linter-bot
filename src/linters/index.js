@@ -1,7 +1,6 @@
 const probotUtil = require( '@humanmade/probot-util' );
 const fs = require( 'fs' );
 const https = require( 'https' );
-const pify = require( 'pify' );
 const tar = require( 'tar' );
 
 const available = {
@@ -27,9 +26,7 @@ const httpGet = ( ...args ) => {
 };
 
 const downloadFile = async ( url, filename ) => {
-	if ( ! fs.existsSync( STANDARDS_DIR ) ) {
-		await pify( fs.mkdir )( STANDARDS_DIR );
-	}
+	await probotUtil.file.ensureDirectory( STANDARDS_DIR );
 
 	console.log( `Fetching ${ url }` );
 	const res = await httpGet( url );
@@ -52,9 +49,7 @@ const prepareLinter = async ( linter, version ) => {
 
 	console.log( `Extracting standard to ${ directory }` );
 
-	if ( ! fs.existsSync( directory ) ) {
-		await pify( fs.mkdir )( directory );
-	}
+	await probotUtil.file.ensureDirectory( directory );
 
 	const extracted = await tar.extract( {
 		cwd: directory,
