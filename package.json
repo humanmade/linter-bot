@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "@humanmade/probot-util": "^0.0.3",
+    "@humanmade/probot-util": "^0.0.4",
     "babel-polyfill": "6.16.0",
     "lodash.chunk": "^4.2.0",
     "parse-diff": "^0.4.0",
