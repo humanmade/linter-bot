@@ -4,6 +4,7 @@
     "@humanmade/probot-util": "^0.0.4",
     "babel-polyfill": "6.16.0",
     "lodash.chunk": "^4.2.0",
+    "module-alias": "^2.1.0",
     "parse-diff": "^0.4.0",
     "pify": "^3.0.0",
     "probot": "^6.1.0",
