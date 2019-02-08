@@ -1,6 +1,7 @@
 const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
+const moduleAlias = require( 'module-alias' );
 
 const formatMessage = message => {
 	return {
@@ -37,15 +38,14 @@ module.exports = standardPath => codepath => {
 		cwd: codepath,
 	};
 
-	// SUPER-HACK!
 	// We need to use node_modules from the standard directory, but because
 	// we're not invoking eslint over the CLI, we can't change where `require()`
-	// loads modules from unless we override the env and re-init Module.
+	// loads modules from unless we override the module loader.
 	//
-	// This is technically Node-internal behaviour, but it works.
-	const prevPath = process.env.NODE_PATH;
-	process.env.NODE_PATH = `${ standardPath }/node_modules`;
-	Module._initPaths();
+	// This ensures dependencies load from the standards instead, and the
+	// standard itself is loaded from the right place.
+	moduleAlias.addPath( `${ standardPath }/node_modules` );
+	moduleAlias.addAlias( 'eslint-config-humanmade', standardPath );
 
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
@@ -66,9 +66,8 @@ module.exports = standardPath => codepath => {
 			}
 		}
 
-		// Undo SUPER-HACK!
-		process.env.NODE_PATH = prevPath;
-		Module._initPaths();
+		// Reset path loader.
+		moduleAlias.reset();
 
 		resolve( formatOutput( output, codepath ) );
 	} );
