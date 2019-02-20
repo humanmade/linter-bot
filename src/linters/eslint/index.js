@@ -47,6 +47,16 @@ module.exports = standardPath => codepath => {
 	moduleAlias.addPath( `${ standardPath }/node_modules` );
 	moduleAlias.addAlias( 'eslint-config-humanmade', standardPath );
 
+	const actualStandardPath = require.resolve( 'eslint-config-humanmade' );
+	const origFindPath = Module._findPath;
+	Module._findPath = ( name, ...args ) => {
+		const path = origFindPath( name, ...args );
+		if ( ! path && name === 'eslint-config-humanmade' ) {
+			return actualStandardPath;
+		}
+		return path;
+	};
+
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
 
@@ -68,6 +78,7 @@ module.exports = standardPath => codepath => {
 
 		// Reset path loader.
 		moduleAlias.reset();
+		Module._findPath = origFindPath;
 
 		resolve( formatOutput( output, codepath ) );
 	} );
