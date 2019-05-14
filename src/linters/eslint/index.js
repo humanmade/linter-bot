@@ -33,6 +33,15 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
+/**
+ * Run the ESLint engine against the given path.
+ *
+ * Handles ignoring any errors that aren't relevant.
+ *
+ * @param {Object} engine ESLint engine instance.
+ * @param {String} codepath Path to run linter on.
+ * @return {Object} ESLint results object.
+ */
 const run = ( engine, codepath ) => {
 	try {
 		return engine.executeOnFiles( [ codepath ] );
