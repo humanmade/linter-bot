@@ -40,6 +40,7 @@ const dataRegex = /^.+?\t.+?\t(\{.+)/s;
 
 process.stderr.write( 'Waiting for results…\n' );
 setTimeout( function () {
+	const logFile = fs.openSync( `./${ reqId }.log`, 'w' );
 	const viewProc = child_process.spawnSync(
 		'aws',
 		[
@@ -69,9 +70,11 @@ setTimeout( function () {
 			}
 		}
 
-		process.stdout.write( message );
+		fs.writeSync( logFile, message );
 	} );
 
+	fs.closeSync( logFile );
 	fs.writeFileSync( `./${ reqId }.json`, rawData );
-	process.stderr.write( `Raw data saved to ${ reqId }.json\n` );
+	process.stderr.write( `Log saved to:\t\t${ reqId }.log\n` );
+	process.stderr.write( `Raw data saved to:\t${ reqId }.json\n` );
 }, 2000 );
