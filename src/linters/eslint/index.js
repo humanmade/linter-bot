@@ -33,6 +33,36 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
+/**
+ * Run the ESLint engine against the given path.
+ *
+ * Handles ignoring any errors that aren't relevant.
+ *
+ * @param {Object} engine ESLint engine instance.
+ * @param {String} codepath Path to run linter on.
+ * @return {Object} ESLint results object.
+ */
+const run = ( engine, codepath ) => {
+	try {
+		return engine.executeOnFiles( [ codepath ] );
+	} catch ( err ) {
+		switch ( err.messageTemplate ) {
+			case 'file-not-found':
+			case 'all-files-ignored':
+				// No JS files in the repo! Ignore this, as it's not really
+				// an error.
+				return {
+					errorCount: 0,
+					warningCount: 0,
+					results: [],
+				};
+
+			default:
+				throw err;
+		}
+	}
+};
+
 module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,
@@ -63,13 +93,13 @@ module.exports = standardPath => codepath => {
 	return new Promise( ( resolve, reject ) => {
 		let output;
 		try {
-			output = engine.executeOnFiles( [ codepath ] );
+			output = run( engine, codepath );
 		} catch ( err ) {
 			if ( err.messageTemplate === 'no-config-found' ) {
 				// Try with default configuration.
 				const engine = new CLIEngine( { ...options, configFile: `${ standardPath }/index.js` } );
 				console.log( 'Running eslint with default config on path', codepath );
-				output = engine.executeOnFiles( [ codepath ] );
+				output = run( engine, codepath );
 			} else {
 				console.log( err );
 				throw err;
