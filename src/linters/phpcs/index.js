@@ -30,7 +30,9 @@ const formatOutput = ( data, codepath ) => {
 	};
 	const files = {};
 	Object.keys( data.files ).forEach( file => {
-		const relPath = path.relative( codepath, file );
+		// Ensure the path has a leading slash.
+		const fullPath = file.replace( /^([^\/])/,'/$1' );
+		const relPath = path.relative( codepath, fullPath );
 		files[ relPath ] = data.files[ file ].messages.map( formatMessage );
 	} );
 
