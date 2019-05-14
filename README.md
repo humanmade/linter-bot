@@ -138,6 +138,39 @@ To test a `pull_request.synchronize` webhook:
 node_modules/.bin/probot simulate pull_request fixtures/pull_request.synchronize.json ./plugin/linter.js
 ```
 
+### Replicating production issues
+
+The first step to replicating production issues is to understand the request being sent to hm-linter.
+
+Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command and passing the request ID.
+
+This will write the logs to `{id}.log`, and save the raw data to `{id}.json`.
+
+```sh
+// For request deadbeef-badd-ecaf-dead-beefbaddecaf:
+node scripts/get-logs.js deadbeef-badd-ecaf-dead-beefbaddecaf
+```
+
+```
+Querying for deadbeef-badd-ecaf-dead-beefbaddecaf
+Waiting for results…
+Log saved to:           deadbeef-badd-ecaf-dead-beefbaddecaf.log
+Raw data saved to:      deadbeef-badd-ecaf-dead-beefbaddecaf.json
+```
+
+You can then run the handler against a simulated Lambda environment locally:
+
+```
+# Run build at least once:
+npm run build
+
+# Or run in watch mode if making local changes:
+# npm run build:babel-watch
+
+# Run the handler.
+npm run test < deadbeef-badd-ecaf-dead-beefbaddecaf.json
+```
+
 ### Deployment
 
 hm-linter is deployed on a Lambda instance. Deployment is handled via npm scripts, which you run via `npm run <script>` or `yarn run <script>`.
@@ -151,8 +184,7 @@ To deploy hm-linter, you need the following things:
 Deployment can be done in one step by running the `deploy` script, but you should generally test builds first. The following scripts will help with that:
 
 * `build` - Builds JS, downloads PHP binary, and installs Composer/npm dependencies.
+* `build:babel-watch` - Builds JS and rebuilds if changed.
 * `deploy:package` - Builds the directory into a zip. Use this to verify the ZIP before pushing.
 * `deploy:push` - Push the built zip to Lambda. Use this if `deploy` fails due to some sort of network error.
-* `test` - Run the index handler against a simulated Lambda environment. Before running this:
-	* Run `build` at least once
-	* Set the `AWS_LAMBDA_EVENT_BODY` environment variable to the contents of `fixtures/lambda-test-event.json` (`cat fixtures/lambda-test-event.json | read -z AWS_LAMBDA_EVENT_BODY`)
+* `test` - Run the index handler against a simulated Lambda environment. See above for how to use.
