@@ -184,6 +184,15 @@ const formatAnnotations = ( state, baseUrl ) => {
 	return annotations;
 };
 
+/**
+ * Format request metadata.
+ *
+ * Provides request details as part of the summary, allowing for easier tracing
+ * and debugging.
+ *
+ * @param {Object} context Context object passed to hooks.
+ * @return {String} HTML summary of request metadata.
+ */
 const formatMetadata = context => {
 	const { metadata, reqContext } = context;
 
