@@ -39,6 +39,6 @@
     "deploy": "npm run clean:package && npm run build && npm run deploy:check && npm run deploy:package-production && npm run deploy:push",
     "deploy:dev": "npm run clean:package && npm run build && npm run deploy:check-dev && npm run deploy:package-dev && npm run deploy:push-dev",
     "start": "node start-development.js",
-    "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs8.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
+    "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -e \"DOCKER_LAMBDA_USE_STDIN=1\" -i -v \"$PWD\":/var/task lambci/lambda:nodejs8.10 index.probotHandler"
   }
 }
