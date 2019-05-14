@@ -137,6 +137,10 @@ const onCheck = async context => {
 			head_branch,
 			head_sha,
 			started_at: ( new Date() ).toISOString(),
+			output: {
+				title: 'Checking…',
+				summary: formatMetadata( context ),
+			},
 		},
 	} );
 
