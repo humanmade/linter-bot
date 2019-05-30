@@ -8,6 +8,10 @@ const DEFAULT_CONFIG = {
 		enabled: true,
 		version: 'inherit',
 	},
+	stylelint: {
+		enabled: false,
+		version: 'inherit',
+	},
 };
 const FILENAME = 'hmlinter.yml';
 
