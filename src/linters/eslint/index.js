@@ -79,7 +79,7 @@ const run = ( engine, codepath ) => {
 /**
  * Run eslint linting.
  *
- * @param {String} standardPath Optional. Path to custom standard set.
+ * @param {String} standardPath Path to custom standard set.
  * @returns {function(*=): Promise<any>}
  */
 module.exports = standardPath => codepath => {

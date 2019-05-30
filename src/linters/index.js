@@ -83,7 +83,7 @@ const prepareLinter = async ( linter, version ) => {
 };
 
 /**
- * Run linters.
+ * Run all linters.
  *
  * @param {Promise} configPromise
  * @returns {Promise<any[]>}

@@ -1,5 +1,13 @@
 const parseDiff = require( 'parse-diff' );
 
+/**
+ * Fetch which files are different in a particular push changeset.
+ *
+ * @param {Object} pushConfig Data about the push being evaluated.
+ * @param {Number} number     Run number.
+ * @param {Object} github     GitHub API.
+ * @returns {Promise<void>}
+ */
 module.exports.getDiffMapping = async ( pushConfig, number, github ) => {
 	const diff = await github.pullRequests.get({
 		owner: pushConfig.owner,

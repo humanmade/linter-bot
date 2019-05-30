@@ -55,7 +55,7 @@ const formatOutput = ( data, codepath ) => {
 /**
  * Run PHPCS linting.
  *
- * @param {String} standardPath Optional. Path to custom standard set.
+ * @param {String} standardPath Path to custom standard set.
  * @returns {function(*=): Promise<any | never>}
  */
 module.exports = standardPath => codepath => {
@@ -79,7 +79,6 @@ module.exports = standardPath => codepath => {
 			installed_paths += ',vendor/automattic/vipwpcs';
 		}
 
-		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
 			'--runtime-set',
