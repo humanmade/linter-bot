@@ -42,7 +42,9 @@ By default, hmlinter will use the latest version of the Human Made coding standa
 # GLOBAL SETTINGS
 
 # By default, the version is set to "latest". This can be set to any version
-# >=0.4.2, but you MUST include the full version number.
+# from 0.4.2 and above, but you MUST include the full version number.
+# If you wish to increase the security releases automatically set the 
+# version to be 'X.Y', otherwise it will be 'X.Y.Z'.
 version: latest
 
 # PER-STANDARD SETTINGS
@@ -70,7 +72,6 @@ To get started on development of hm-linter:
 
 1. Clone this repository
 2. `npm install` or `yarn install` the dependencies
-3. `cd src/linters/phpcs && composer install` to download the HM Coding Standards
 
 
 ### Testing

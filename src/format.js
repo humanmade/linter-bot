@@ -184,6 +184,27 @@ const formatAnnotations = ( state, baseUrl ) => {
 	return annotations;
 };
 
+/**
+ * Format request metadata.
+ *
+ * Provides request details as part of the summary, allowing for easier tracing
+ * and debugging.
+ *
+ * @param {Object} context Context object passed to hooks.
+ * @return {String} HTML summary of request metadata.
+ */
+const formatMetadata = context => {
+	const { metadata, reqContext } = context;
+
+	let body = '<details><summary>Request details</summary><ul>';
+	body += `\n<li><strong>GitHub Event ID:</strong> <code>${ metadata.headers['X-GitHub-Delivery'] }</code></li>`;
+	body += `\n<li><strong>API Gateway ID:</strong> <code>${ metadata.requestContext.requestId }</code></li>`;
+	body += `\n<li><strong>Lambda ID:</strong> <code>${ reqContext.awsRequestId }</code></li>`;
+	body += `\n<li><strong>Log Stream:</strong> <code>${ reqContext.logStreamName }</code></li>`;
+	body += '</ul></details>';
+	return body;
+};
+
 const formatWelcome = ( state, gistUrl ) => {
 	let body = `Hi there! Thanks for activating hm-linter on this repo.`
 	body += `\n\nTo start you off, [here's an initial lint report of the repo](${ gistUrl }).`;
@@ -202,6 +223,7 @@ module.exports = {
 	formatAnnotations,
 	formatComparison,
 	formatDetails,
+	formatMetadata,
 	formatReview,
 	formatReviewChange,
 	formatSummary,

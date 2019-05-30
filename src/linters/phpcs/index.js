@@ -43,7 +43,9 @@ const formatOutput = ( data, codepath ) => {
 	};
 	const files = {};
 	Object.keys( data.files ).forEach( file => {
-		const relPath = path.relative( codepath, file );
+		// Ensure the path has a leading slash.
+		const fullPath = file.replace( /^([^\/])/,'/$1' );
+		const relPath = path.relative( codepath, fullPath );
 		files[ relPath ] = data.files[ file ].messages.map( formatMessage );
 	} );
 
@@ -70,12 +72,19 @@ module.exports = standardPath => codepath => {
 	} ) ).then( rulesetFiles => {
 		const standard = rulesetFiles.find( file => !! file ) || `vendor/humanmade/coding-standards`;
 
+		let installed_paths = 'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM';
+
+		// Only include the VIP WPCS if the path exists within this version of the standards.
+		if ( fs.existsSync( path.join( standardPath, 'vendor', 'automattic', 'vipwpcs' ) ) ) {
+			installed_paths += ',vendor/automattic/vipwpcs';
+		}
+
 		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
 			'--runtime-set',
 			'installed_paths',
-			'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM',
+			installed_paths,
 			`--standard=${standard}`,
 			'--report=json',
 			codepath

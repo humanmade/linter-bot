@@ -1,6 +1,7 @@
 const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
+const moduleAlias = require( 'module-alias' );
 
 /**
  * Format message data into a consistent format for usage in formatOutput.
@@ -46,6 +47,36 @@ const formatOutput = ( data, codepath ) => {
 };
 
 /**
+ * Run the ESLint engine against the given path.
+ *
+ * Handles ignoring any errors that aren't relevant.
+ *
+ * @param {Object} engine ESLint engine instance.
+ * @param {String} codepath Path to run linter on.
+ * @return {Object} ESLint results object.
+ */
+const run = ( engine, codepath ) => {
+	try {
+		return engine.executeOnFiles( [ codepath ] );
+	} catch ( err ) {
+		switch ( err.messageTemplate ) {
+			case 'file-not-found':
+			case 'all-files-ignored':
+				// No JS files in the repo! Ignore this, as it's not really
+				// an error.
+				return {
+					errorCount: 0,
+					warningCount: 0,
+					results: [],
+				};
+
+			default:
+				throw err;
+		}
+	}
+};
+
+/**
  * Run eslint linting.
  *
  * @param {String} standardPath Optional. Path to custom standard set.
@@ -56,15 +87,24 @@ module.exports = standardPath => codepath => {
 		cwd: codepath,
 	};
 
-	// SUPER-HACK!
 	// We need to use node_modules from the standard directory, but because
 	// we're not invoking eslint over the CLI, we can't change where `require()`
-	// loads modules from unless we override the env and re-init Module.
+	// loads modules from unless we override the module loader.
 	//
-	// This is technically Node-internal behaviour, but it works.
-	const prevPath = process.env.NODE_PATH;
-	process.env.NODE_PATH = `${ standardPath }/node_modules`;
-	Module._initPaths();
+	// This ensures dependencies load from the standards instead, and the
+	// standard itself is loaded from the right place.
+	moduleAlias.addPath( `${ standardPath }/node_modules` );
+	moduleAlias.addAlias( 'eslint-config-humanmade', standardPath );
+
+	const actualStandardPath = require.resolve( 'eslint-config-humanmade' );
+	const origFindPath = Module._findPath;
+	Module._findPath = ( name, ...args ) => {
+		const path = origFindPath( name, ...args );
+		if ( ! path && name === 'eslint-config-humanmade' ) {
+			return actualStandardPath;
+		}
+		return path;
+	};
 
 	const { CLIEngine } = require( 'eslint' );
 	const engine = new CLIEngine( options );
@@ -72,22 +112,22 @@ module.exports = standardPath => codepath => {
 	return new Promise( ( resolve, reject ) => {
 		let output;
 		try {
-			output = engine.executeOnFiles( [ codepath ] );
+			output = run( engine, codepath );
 		} catch ( err ) {
 			if ( err.messageTemplate === 'no-config-found' ) {
 				// Try with default configuration.
 				const engine = new CLIEngine( { ...options, configFile: `${ standardPath }/index.js` } );
 				console.log( 'Running eslint with default config on path', codepath );
-				output = engine.executeOnFiles( [ codepath ] );
+				output = run( engine, codepath );
 			} else {
 				console.log( err );
 				throw err;
 			}
 		}
 
-		// Undo SUPER-HACK!
-		process.env.NODE_PATH = prevPath;
-		Module._initPaths();
+		// Reset path loader.
+		moduleAlias.reset();
+		Module._findPath = origFindPath;
 
 		resolve( formatOutput( output, codepath ) );
 	} );

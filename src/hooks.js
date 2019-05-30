@@ -7,6 +7,7 @@ const { getDiffMapping } = require( './diff' );
 const {
 	formatAnnotations,
 	formatDetails,
+	formatMetadata,
 	formatReview,
 	formatReviewChange,
 	formatSummary,
@@ -136,6 +137,10 @@ const onCheck = async context => {
 			head_branch,
 			head_sha,
 			started_at: ( new Date() ).toISOString(),
+			output: {
+				title: 'Checking…',
+				summary: formatMetadata( context ),
+			},
 		},
 	} );
 
@@ -149,7 +154,10 @@ const onCheck = async context => {
 				accept: 'application/vnd.github.antiope-preview+json',
 			},
 			input: {
-				output,
+				output: {
+					...output,
+					summary: output.summary + formatMetadata( context ),
+				},
 			}
 		} );
 	};
@@ -167,7 +175,10 @@ const onCheck = async context => {
 				completed_at: ( new Date() ).toISOString(),
 				status: 'completed',
 				conclusion,
-				output,
+				output: {
+					...output,
+					summary: output.summary + formatMetadata( context ),
+				},
 			}
 		} );
 	};
