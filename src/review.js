@@ -1,6 +1,15 @@
 const metadata = require( './metadata' );
 const { combineLinters } = require( './util' );
 
+/**
+ * Fetch all previous runs against a branch or repo.
+ *
+ * @param {Object} github GitHub API access.
+ * @param {String} owner  Username of the code owner.
+ * @param {String} repo   Name of the repository being linted.
+ * @param {Number} number Run number.
+ * @returns {Promise<*>}
+ */
 async function getAll( github, owner, repo, number ) {
 	// Paginate and exhaust.
 	let response = await github.pullRequests.getReviews( {
@@ -19,6 +28,15 @@ async function getAll( github, owner, repo, number ) {
 	return reviews;
 }
 
+/**
+ * Fetch data about a previous run against a branch or repo.
+ *
+ * @param {Object} github GitHub API access.
+ * @param {String} owner  Username of the code owner.
+ * @param {String} repo   Name of the repository being linted.
+ * @param {Number} number Run number.
+ * @returns {Promise<number>}
+ */
 async function getPreviousRun( github, owner, repo, number ) {
 	const reviews = await getAll( github, owner, repo, number );
 
@@ -29,13 +47,34 @@ async function getPreviousRun( github, owner, repo, number ) {
 		.find( data => !! data );
 }
 
+/**
+ * Generate a unique ID string for an error.
+ *
+ * @param {Object} error Data about a particular error.
+ * @returns {string} Unique error ID.
+ */
 const errorId = error => `L${ error.line }C${ error.column || 0 }-${ error.source }`;
+
+/**
+ * Convert an array of errors into a more meaningful keyed object.
+ *
+ * @param {Array} list List of errors.
+ * @returns {Object} An organized set of errors.
+ */
 const errorsById = list => list.reduce( ( errs, error ) => {
 	return {
 		...errs,
 		[ errorId( error ) ]: error,
 	}
 }, {} );
+
+/**
+ * Compare two sets of error data to find differences between them.
+ *
+ * @param {Array} left  First error set.
+ * @param {Array} right Second error set.
+ * @returns {Object} Lists of errors unique to each set of runs.
+ */
 function diffErrors( left, right ) {
 	const leftIds = errorsById( left );
 	const rightIds = errorsById( right );
@@ -46,9 +85,29 @@ function diffErrors( left, right ) {
 	};
 }
 
+/**
+ * Count the number of errors in an error list.
+ *
+ * @param {Array} errors List of errors.
+ * @returns {Number} Quantity of errors.
+ */
 const countErrors = errors => errors.reduce( ( total, err ) => err.severity === 'error' ? total + 1 : total, 0 );
+
+/**
+ * Count the number of warnings in an error list.
+ *
+ * @param {Array} errors List of errors.
+ * @returns {Number} Quantity of warnings.
+ */
 const countWarnings = errors => errors.reduce( ( total, err ) => err.severity === 'warning' ? total + 1 : total, 0 );
 
+/**
+ * Compare two Linter runs against each other.
+ *
+ * @param {Object} previous Previous linting data.
+ * @param {Object} current  Current linting data.
+ * @returns {Object} Organized data about the difference between two linter runs.
+ */
 function compareRuns( previous, current ) {
 	const totals = {
 		newErrors: 0,
