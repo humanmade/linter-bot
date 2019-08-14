@@ -4,7 +4,7 @@ const fs = require( 'fs' );
 const reqId = process.argv[2];
 
 const now = Math.floor( Date.now() / 1000 );
-const start = now - ( 60 * 60 * 2 );
+const start = now - ( 60 * 60 * 48 );
 const region = 'us-east-1';
 const group = '/aws/lambda/hm-linter';
 const query = `fields @message | sort @timestamp asc | filter @requestId = '${ reqId }'`;
