@@ -9,7 +9,7 @@ const start = now - ( 60 * 60 * HOUR_LIMIT );
 const region = 'us-east-1';
 const group = '/aws/lambda/hm-linter';
 const query = `fields @message | sort @timestamp asc | filter @requestId = '${ reqId }'`;
-
+const logDir = './logs';
 
 process.stderr.write( `Querying for ${ reqId }\n` );
 const proc = child_process.spawnSync(
@@ -41,7 +41,7 @@ const dataRegex = /^.+?\t.+?\t(\{.+)/s;
 
 process.stderr.write( 'Waiting for results…\n' );
 setTimeout( function () {
-	const logFile = fs.openSync( `./${ reqId }.log`, 'w' );
+	const logFile = fs.openSync( `${ logDir }/${ reqId }.log`, 'w' );
 	const viewProc = child_process.spawnSync(
 		'aws',
 		[
@@ -75,7 +75,7 @@ setTimeout( function () {
 	} );
 
 	fs.closeSync( logFile );
-	fs.writeFileSync( `./${ reqId }.json`, rawData );
-	process.stderr.write( `Log saved to:\t\t${ reqId }.log\n` );
-	process.stderr.write( `Raw data saved to:\t${ reqId }.json\n` );
+	fs.writeFileSync( `${ logDir }/${ reqId }.json`, rawData );
+	process.stderr.write( `Log saved to:\t\tlogs/${ reqId }.log\n` );
+	process.stderr.write( `Raw data saved to:\tlogs/${ reqId }.json\n` );
 }, 2000 );
