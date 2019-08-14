@@ -142,7 +142,7 @@ node_modules/.bin/probot simulate pull_request fixtures/pull_request.synchronize
 
 The first step to replicating production issues is to understand the request being sent to hm-linter.
 
-Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command and passing the request ID.
+Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command and passing the Lambda (request) ID.
 
 This will write the logs to `{id}.log`, and save the raw data to `{id}.json`.
 
