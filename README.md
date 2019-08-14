@@ -147,8 +147,11 @@ Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and fin
 This will write the logs to `{id}.log`, and save the raw data to `{id}.json`.
 
 ```sh
-// For request deadbeef-badd-ecaf-dead-beefbaddecaf:
+# For request deadbeef-badd-ecaf-dead-beefbaddecaf:
 node scripts/get-logs.js deadbeef-badd-ecaf-dead-beefbaddecaf
+
+# By default, this will only check the last 48 hours; to override, set HOUR_LIMIT:
+HOUR_LIMIT=192 node scripts/get-logs.js deadbeef-badd-ecaf-dead-beefbaddecaf
 ```
 
 ```
