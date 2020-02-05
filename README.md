@@ -156,3 +156,13 @@ Deployment can be done in one step by running the `deploy` script, but you shoul
 * `test` - Run the index handler against a simulated Lambda environment. Before running this:
 	* Run `build` at least once
 	* Set the `AWS_LAMBDA_EVENT_BODY` environment variable to the contents of `fixtures/lambda-test-event.json` (`cat fixtures/lambda-test-event.json | read -z AWS_LAMBDA_EVENT_BODY`)
+
+
+## Advanced Configuration
+
+Deployment settings can be changed using environment variables. In addition to the app settings noted above, the following can also be set:
+
+* `CONFIG_FILE` - Name of the configuration file (default `hmlinter.yml`)
+* `STANDARD_URL` - URL for the standards directory (default `https://make.hmn.md/hmlinter/standards`)
+* `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
+* `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
