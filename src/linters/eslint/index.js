@@ -63,6 +63,8 @@ const run = ( engine, codepath ) => {
 	}
 };
 
+const DEFAULT_STANDARD = process.env.DEFAULT_STANDARD_ESLINT || 'eslint-config-humanmade';
+
 module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,
@@ -75,13 +77,13 @@ module.exports = standardPath => codepath => {
 	// This ensures dependencies load from the standards instead, and the
 	// standard itself is loaded from the right place.
 	moduleAlias.addPath( `${ standardPath }/node_modules` );
-	moduleAlias.addAlias( 'eslint-config-humanmade', standardPath );
+	moduleAlias.addAlias( DEFAULT_STANDARD, standardPath );
 
-	const actualStandardPath = require.resolve( 'eslint-config-humanmade' );
+	const actualStandardPath = require.resolve( DEFAULT_STANDARD );
 	const origFindPath = Module._findPath;
 	Module._findPath = ( name, ...args ) => {
 		const path = origFindPath( name, ...args );
-		if ( ! path && name === 'eslint-config-humanmade' ) {
+		if ( ! path && name === DEFAULT_STANDARD ) {
 			return actualStandardPath;
 		}
 		return path;
