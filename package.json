@@ -20,7 +20,8 @@
     "babel-polyfill": "6.16.0",
     "babel-preset-es2015": "6.16.0",
     "babel-preset-stage-0": "6.16.0",
-    "dotenv": "^5.0.1"
+    "dotenv": "^5.0.1",
+    "run.env": "^1.1.0"
   },
   "scripts": {
     "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D",
@@ -33,11 +34,11 @@
     "deploy:package": "zip --symlinks -9 -x lambda-function.zip -x \"src/*\" -r lambda-function *",
     "deploy:package-dev": "npm run deploy:package && cp development.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
     "deploy:package-production": "npm run deploy:package && cp production.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
-    "deploy:push": "aws lambda update-function-code --function-name hm-linter --region us-east-1 --zip-file fileb://lambda-function.zip",
-    "deploy:push-dev": "aws lambda update-function-code --function-name hm-linter-development --region us-east-1 --zip-file fileb://lambda-function.zip",
+    "deploy:push": "NODE_ENV=production run.env scripts/deploy.sh",
+    "deploy:push-dev": "NODE_ENV=development run.env scripts/deploy.sh",
     "deploy": "npm run clean:package && npm run build && npm run deploy:check && npm run deploy:package-production && npm run deploy:push",
     "deploy:dev": "npm run clean:package && npm run build && npm run deploy:check-dev && npm run deploy:package-dev && npm run deploy:push-dev",
     "start": "node start-development.js",
-    "test": "docker run -e \"APP_ID=5455\" -e \"WEBHOOK_SECRET=development\" -v \"$PWD\":/var/task lambci/lambda:nodejs8.10 index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
+    "test": "docker run --env-file .env -v \"$PWD\":/var/task lambci/lambda:nodejs12.x index.probotHandler \"$AWS_LAMBDA_EVENT_BODY\""
   }
 }

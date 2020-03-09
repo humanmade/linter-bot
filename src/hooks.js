@@ -49,7 +49,7 @@ const onAdd = async context => {
 		github.issues.create( {
 			owner,
 			repo: repo.name,
-			title: `Hello from hm-linter! (${ summary })`,
+			title: `Hello from ${ process.env.BOT_NAME || 'hmlinter' }! (${ summary })`,
 			body,
 		} );
 	} );
@@ -73,7 +73,7 @@ const onPush = async context => {
 			owner,
 			repo,
 			sha:     commit,
-			context: 'hmlinter',
+			context: process.env.BOT_NAME || 'hmlinter',
 			state,
 			description: description.substr( 0,139 ),
 			target_url: logUrl,
@@ -133,7 +133,7 @@ const onCheck = async context => {
 			accept: 'application/vnd.github.antiope-preview+json',
 		},
 		input: {
-			name: 'hmlinter',
+			name: process.env.BOT_NAME || 'hmlinter',
 			head_branch,
 			head_sha,
 			started_at: ( new Date() ).toISOString(),
@@ -192,7 +192,7 @@ const onCheck = async context => {
 		completeRun(
 			'failure',
 			{
-				title: 'Failed to run hmlinter',
+				title: `Failed to run ${ process.env.BOT_NAME || 'hmlinter' }`,
 				summary: `Could not run: ${ e }`,
 				output: JSON.stringify( serializeError( e ), null, 2 )
 			}
@@ -225,7 +225,7 @@ const onCheck = async context => {
 		completeRun(
 			'failure',
 			{
-				title: 'hmlinter checks failed',
+				title: `${ process.env.BOT_NAME || 'hmlinter' } checks failed`,
 				summary: formatSummary( lintState ),
 				annotations: lastGroup,
 			}
