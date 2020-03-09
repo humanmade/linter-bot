@@ -166,3 +166,5 @@ Deployment settings can be changed using environment variables. In addition to t
 * `STANDARD_URL` - URL for the standards directory (default `https://make.hmn.md/hmlinter/standards`)
 * `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
 * `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
+* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hmlinter`)
+* `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
