@@ -190,7 +190,7 @@ const onCheck = async context => {
 	} catch ( e ) {
 		console.log(e)
 		completeRun(
-			'failure',
+			process.env.FORCE_NEUTRAL_STATUS ? 'neutral' : 'failure',
 			{
 				title: `Failed to run ${ process.env.BOT_NAME || 'hmlinter' }`,
 				summary: `Could not run: ${ e }`,
@@ -200,7 +200,39 @@ const onCheck = async context => {
 		throw e;
 	}
 
-	if ( lintState.passed ) {
+	if ( process.env.FORCE_NEUTRAL_STATUS ) {
+		console.log( 'Setting status to neutral' );
+		let gistUrl;
+		try {
+			gistUrl = await createGist(
+				`${ owner }/${ repo.name }@${ head_sha }`,
+				'output.json',
+				formatDetails( lintState )
+			);
+		} catch ( e ) {
+			console.log( 'Triggered error' );
+			console.log( e );
+			completeRun(
+				'neutral',
+				{
+					title: `Failed to run ${ process.env.BOT_NAME || 'hmlinter' }`,
+					summary: `Could not run: ${ e }`,
+					output: JSON.stringify( serializeError( e ), null, 2 )
+				}
+			);
+			throw e;
+		}
+
+		const summary = formatSummary( lintState );
+		const fullSummary = summary + `\n\n[View output](${ gistUrl })`;
+		completeRun(
+			'neutral',
+			{
+				title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
+				summary: fullSummary,
+			}
+		);
+	} else if ( lintState.passed ) {
 		completeRun(
 			'success',
 			{

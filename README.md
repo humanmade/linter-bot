@@ -170,3 +170,4 @@ Deployment settings can be changed using environment variables. In addition to t
 * `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
 * `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hmlinter`)
 * `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
+* `FORCE_NEUTRAL_STATUS` - Mark failed checks as "neutral", which shows the check but does not mark it as failed (default disabled)
