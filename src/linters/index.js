@@ -86,6 +86,9 @@ module.exports = async configPromise => {
 		// Download and extract the linter in the background.
 		const linterPromise = prepareLinter( type, version );
 
+		// Ensure we don't trigger any uncaught exception errors.
+		linterPromise.catch( err => console.log( `Error setting up ${ type }` ) );
+
 		return async ( ...args ) => {
 			// Only await when needed.
 			const linter = await linterPromise;
