@@ -51,7 +51,12 @@ module.exports = standardPath => codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		let standard;
+		if ( process.env.FORCE_STANDARD ) {
+			standard = process.env.FORCE_STANDARD;
+		} else {
+			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		}
 
 		let installed_paths = 'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM';
 
