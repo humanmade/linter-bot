@@ -25,15 +25,22 @@ const formatMessage = message => {
 
 const formatOutput = ( data, codepath ) => {
 	const totals = {
-		errors:   data.totals.errors,
-		warnings: data.totals.warnings,
+		errors: 0,
+		warnings: 0,
 	};
 	const files = {};
 	Object.keys( data.files ).forEach( file => {
 		// Ensure the path has a leading slash.
 		const fullPath = file.replace( /^([^\/])/,'/$1' );
 		const relPath = path.relative( codepath, fullPath );
-		files[ relPath ] = data.files[ file ].messages.map( formatMessage );
+		const messages = data.files[ file ].messages.map( formatMessage );
+		totals.errors = messages.reduce( ( count, message ) => {
+			return message.severity === 'error' ? count + 1 : count;
+		}, totals.errors );
+		totals.warnings = messages.reduce( ( count, message ) => {
+			return message.severity === 'warning' ? count + 1 : count;
+		}, totals.warnings );
+		files[ relPath ] = messages;
 	} );
 
 	return { totals, files };
@@ -51,13 +58,26 @@ module.exports = standardPath => codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		let standard;
+		if ( process.env.FORCE_STANDARD_PHPCS ) {
+			standard = process.env.FORCE_STANDARD_PHPCS;
+		} else {
+			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		}
 
-		let installed_paths = 'vendor/wp-coding-standards/wpcs,vendor/fig-r/psr2r-sniffer,vendor/humanmade/coding-standards/HM';
+		const installedPaths = [
+			'vendor/fig-r/psr2r-sniffer',
+			'vendor/humanmade/coding-standards/HM',
+			'vendor/humanmade/coding-standards/HM-Required',
+			'vendor/phpcompatibility/php-compatibility',
+			'vendor/phpcompatibility/phpcompatibility-paragonie',
+			'vendor/phpcompatibility/phpcompatibility-wp',
+			'vendor/wp-coding-standards/wpcs',
+		]
 
 		// Only include the VIP WPCS if the path exists within this version of the standards.
 		if ( fs.existsSync( path.join( standardPath, 'vendor', 'automattic', 'vipwpcs' ) ) ) {
-			installed_paths += ',vendor/automattic/vipwpcs';
+			installedPaths.push( 'vendor/automattic/vipwpcs' );
 		}
 
 		// const standard = 'PSR2'; //...
@@ -65,7 +85,7 @@ module.exports = standardPath => codepath => {
 			phpcsPath,
 			'--runtime-set',
 			'installed_paths',
-			installed_paths,
+			installedPaths.join( ',' ),
 			`--standard=${standard}`,
 			'--report=json',
 			codepath
