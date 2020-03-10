@@ -51,7 +51,12 @@ module.exports = standardPath => codepath => {
 			} );
 		} );
 	} ) ).then( rulesetFiles => {
-		const standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		let standard;
+		if ( process.env.FORCE_STANDARD_PHPCS ) {
+			standard = process.env.FORCE_STANDARD_PHPCS;
+		} else {
+			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
+		}
 
 		const installedPaths = [
 			'vendor/fig-r/psr2r-sniffer',
