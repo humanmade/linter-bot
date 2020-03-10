@@ -25,15 +25,22 @@ const formatMessage = message => {
 
 const formatOutput = ( data, codepath ) => {
 	const totals = {
-		errors:   data.totals.errors,
-		warnings: data.totals.warnings,
+		errors: 0,
+		warnings: 0,
 	};
 	const files = {};
 	Object.keys( data.files ).forEach( file => {
 		// Ensure the path has a leading slash.
 		const fullPath = file.replace( /^([^\/])/,'/$1' );
 		const relPath = path.relative( codepath, fullPath );
-		files[ relPath ] = data.files[ file ].messages.map( formatMessage );
+		const messages = data.files[ file ].messages.map( formatMessage );
+		totals.errors = messages.reduce( ( count, message ) => {
+			return message.severity === 'error' ? count + 1 : count;
+		}, totals.errors );
+		totals.warnings = messages.reduce( ( count, message ) => {
+			return message.severity === 'warning' ? count + 1 : count;
+		}, totals.warnings );
+		files[ relPath ] = messages;
 	} );
 
 	return { totals, files };
