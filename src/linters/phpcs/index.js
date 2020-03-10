@@ -52,8 +52,8 @@ module.exports = standardPath => codepath => {
 		} );
 	} ) ).then( rulesetFiles => {
 		let standard;
-		if ( process.env.FORCE_STANDARD ) {
-			standard = process.env.FORCE_STANDARD;
+		if ( process.env.FORCE_STANDARD_PHPCS ) {
+			standard = process.env.FORCE_STANDARD_PHPCS;
 		} else {
 			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
 		}
