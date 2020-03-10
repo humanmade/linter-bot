@@ -24,14 +24,13 @@
     "run.env": "^1.1.0"
   },
   "scripts": {
-    "build:babel": "( rm -rf build || true ) && mkdir build && babel src --out-dir build --ignore src/linters/phpcs/vendor -D",
     "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
     "build:npm": "docker run --rm -v \"${PWD}\":/var/task lambci/lambda:build-nodejs12.x npm install",
-    "build": "npm run build:babel && npm run build:bin && npm run build:npm",
+    "build": "npm run build:bin && npm run build:npm",
     "clean:package": "( test -f lambda-function.zip && rm lambda-function.zip ) || true",
     "deploy:check": "test -f bin/php && test -f production.private-key.pem",
     "deploy:check-dev": "test -f bin/php && test -f development.private-key.pem",
-    "deploy:package": "zip --symlinks -9 -x lambda-function.zip -x \"src/*\" -r lambda-function *",
+    "deploy:package": "zip --symlinks -9 -x lambda-function.zip -r lambda-function *",
     "deploy:package-dev": "npm run deploy:package && cp development.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
     "deploy:package-production": "npm run deploy:package && cp production.private-key.pem private-key.pem && zip -9 lambda-function private-key.pem",
     "deploy:push": "NODE_ENV=production run.env scripts/deploy.sh",
