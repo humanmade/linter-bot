@@ -1,5 +1,3 @@
-require( 'babel-polyfill' );
-
 const { probot } = require( '@humanmade/probot-util' );
 
 // Probot setup
