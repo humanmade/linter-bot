@@ -165,6 +165,7 @@ Deployment settings can be changed using environment variables. In addition to t
 * `BOT_NAME` - Name of the bot (default `hmlinter`)
 * `CONFIG_FILE` - Name of the configuration file (default `hmlinter.yml`)
 * `STANDARD_URL` - URL for the standards directory (default `https://make.hmn.md/hmlinter/standards`)
+* `ENABLED_LINTERS` - Comma-separated string of enabled linter types (default `eslint,phpcs`)
 * `FORCE_STANDARD_PHPCS` - Standard to use for checking, overrides any user standard (default disabled)
 * `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
 * `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
