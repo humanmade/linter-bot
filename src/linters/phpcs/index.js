@@ -83,6 +83,7 @@ module.exports = standardPath => codepath => {
 		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
+			'-q',
 			'--runtime-set',
 			'installed_paths',
 			installedPaths.join( ',' ),
