@@ -6,6 +6,7 @@ const tar = require( 'tar' );
 const available = {
 	eslint: require( './eslint' ),
 	phpcs: require( './phpcs' ),
+	stylelint: require( './stylelint' ),
 };
 
 const STANDARDS_DIR = '/tmp/hmlinter-standards';
