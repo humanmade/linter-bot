@@ -77,6 +77,15 @@ const run = ( engine, codepath ) => {
 };
 
 /**
+ * ESLint standard to use when running eslint.
+ *
+ * This can be customized by setting the DEFAULT_STANDARD_ESLINT environment variable.
+ *
+ * @type {string}
+ */
+const DEFAULT_STANDARD = process.env.DEFAULT_STANDARD_ESLINT || 'eslint-config-humanmade';
+
+/**
  * Run eslint linting.
  *
  * @param {String} standardPath Path to custom standard set.
@@ -94,13 +103,13 @@ module.exports = standardPath => codepath => {
 	// This ensures dependencies load from the standards instead, and the
 	// standard itself is loaded from the right place.
 	moduleAlias.addPath( `${ standardPath }/node_modules` );
-	moduleAlias.addAlias( 'eslint-config-humanmade', standardPath );
+	moduleAlias.addAlias( DEFAULT_STANDARD, standardPath );
 
-	const actualStandardPath = require.resolve( 'eslint-config-humanmade' );
+	const actualStandardPath = require.resolve( DEFAULT_STANDARD );
 	const origFindPath = Module._findPath;
 	Module._findPath = ( name, ...args ) => {
 		const path = origFindPath( name, ...args );
-		if ( ! path && name === 'eslint-config-humanmade' ) {
+		if ( ! path && name === DEFAULT_STANDARD ) {
 			return actualStandardPath;
 		}
 		return path;

@@ -18,9 +18,11 @@ const DEFAULT_CONFIG = {
 /**
  * Filename by which to find a custom configuration in a project.
  *
+ * This can be customized by setting the CONFIG_FILE environment variable.
+ *
  * @type {string}
  */
-const FILENAME = 'hmlinter.yml';
+const FILENAME = process.env.CONFIG_FILE || 'hmlinter.yml';
 
 /**
  * Merges a custom linter file (if any) with our default configuration.
