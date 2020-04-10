@@ -48,12 +48,12 @@ const formatOutput = ( data, codepath ) => {
 		}
 
 		// Exclude any empty files.
-		if ( ! result._postcssResult.messages.length ) {
+		if ( ! result.warnings.length ) {
 			return;
 		}
 
 		const relPath = path.relative( codepath, result.source );
-		files[ relPath ] = result._postcssResult.messages.map( formatMessage );
+		files[ relPath ] = result.warnings.map( formatMessage );
 	} );
 
 	return { totals: getTotals( files ), files };
