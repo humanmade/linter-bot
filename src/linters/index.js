@@ -8,9 +8,10 @@ const available = {
 	phpcs: require( './phpcs' ),
 	stylelint: require( './stylelint' ),
 };
+const enabled = ( process.env.ENABLED_LINTERS || 'eslint,phpcs' ).split( ',' );
 
 const STANDARDS_DIR = '/tmp/hmlinter-standards';
-const BASE_URL = 'https://make.hmn.md/hmlinter/standards';
+const BASE_URL = process.env.STANDARD_URL || 'https://make.hmn.md/hmlinter/standards';
 
 const httpGet = ( ...args ) => {
 	return new Promise( ( resolve, reject ) => {
@@ -71,6 +72,11 @@ module.exports = async configPromise => {
 	console.log( config );
 
 	const linters = Object.keys( available ).map( type => {
+		if ( enabled.indexOf( type ) === -1 ) {
+			console.log( `Skipping ${ type }, not enabled in ENABLED_LINTERS` );
+			return null;
+		}
+
 		const lintConfig = config[ type ] || {};
 		if ( ! lintConfig.enabled ) {
 			return null;
@@ -80,6 +86,9 @@ module.exports = async configPromise => {
 
 		// Download and extract the linter in the background.
 		const linterPromise = prepareLinter( type, version );
+
+		// Ensure we don't trigger any uncaught exception errors.
+		linterPromise.catch( err => console.log( `Error setting up ${ type }` ) );
 
 		return async ( ...args ) => {
 			// Only await when needed.
