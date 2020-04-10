@@ -3,53 +3,74 @@ const Module = require( 'module' );
 const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
 
-const formatMessage = message => {
-	console.log( message );
+/**
+ * Convert an error message from the stylelint format into one acceptable for GitHub
+ *
+ * @param {Object} message
+ * @returns {Object}
+ */
+const formatMessage = message => ( {
+	line:     message.line,
+	column:   message.column,
+	severity: message.severity,
+	message:  message.text,
+	source:   message.rule,
+} );
+
+/**
+ * Fetch a count of the total errors and warnings for our response.
+ *
+ * @param {Object} files
+ * @returns {{warnings: number, errors: number}}
+ */
+const getTotals = ( files ) => {
+	const allErrors = Object.keys(files).reduce( ( accumulator, key ) => accumulator.concat( [ ...files[key] ] ), [] );
 
 	return {
-		line:     message.line,
-		column:   message.column,
-		severity: message.severity >= 2 ? 'error' : 'warning',
-		message:  message.message,
-		source:   message.ruleId,
+		errors:   allErrors.filter( errorData => errorData.severity === 'error' ).length,
+		warnings: allErrors.filter( errorData => errorData.severity === 'warning' ).length,
 	};
 };
 
+/**
+ * Properly Format the return for GitHub.
+ *
+ * @param {Object} data
+ * @param {string} codepath
+ * @returns {{files: {}, totals: {warnings: number, errors: number}}}
+ */
 const formatOutput = ( data, codepath ) => {
-	const totals = {
-		errors:   data.errorCount,
-		warnings: data.warningCount,
-	};
 	const files = {};
-	// console.log( data );
 	data.results.forEach( result => {
-		// Exclude any empty files.
-		if ( ! result.messages.length ) {
+		// Only parse through CSS or SCSS files.
+		if ( ! result.source.match( /\.s?css$/ ) ) {
 			return;
 		}
 
-		const relPath = path.relative( codepath, result.filePath );
-		files[ relPath ] = result.messages.map( formatMessage );
+		// Exclude any empty files.
+		if ( ! result._postcssResult.messages.length ) {
+			return;
+		}
+
+		const relPath = path.relative( codepath, result.source );
+		files[ relPath ] = result._postcssResult.messages.map( formatMessage );
 	} );
 
-	return { totals, files };
+	return { totals: getTotals( files ), files };
 };
 
 module.exports = standardPath => codepath => {
 	const options = {
-		cwd: codepath,
+		files: codepath,
 	};
 
-	console.log( standardPath );
-	console.log( `${ standardPath }node_modules` );
-
 	// We need to use node_modules from the standard directory, but because
-	// we're not invoking eslint over the CLI, we can't change where `require()`
+	// we're not invoking stylelint over the CLI, we can't change where `require()`
 	// loads modules from unless we override the module loader.
 	//
 	// This ensures dependencies load from the standards instead, and the
 	// standard itself is loaded from the right place.
-	moduleAlias.addPath( `${ standardPath }node_modules` );
+	moduleAlias.addAlias( '@runner-packages', `${ standardPath }node_modules` );
 	moduleAlias.addAlias( '@humanmade/stylelint-config', standardPath );
 
 	const actualStandardPath = require.resolve( '@humanmade/stylelint-config' );
@@ -62,31 +83,24 @@ module.exports = standardPath => codepath => {
 		return path;
 	};
 
-	const { CLIEngine } = require( 'stylelint' );
-	const engine = new CLIEngine( options );
+	const { lint } = require( '@runner-packages/stylelint' );
 
 	return new Promise( ( resolve, reject ) => {
-		let output;
+		let data;
+
 		try {
-			output = run( engine, codepath );
+			data = lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
 		} catch ( err ) {
-			if ( err.messageTemplate === 'no-config-found' ) {
-				// Try with default configuration.
-				const engine = new CLIEngine( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } );
-				console.log( 'Running stylelint with default config on path', codepath );
-				output = run( engine, codepath );
-			} else {
-				console.log( err );
-				throw err;
-			}
+			console.log( err );
+			throw err;
 		}
+
+		const output = data.then(resultObject => formatOutput( resultObject, codepath ));
 
 		// Reset path loader.
 		moduleAlias.reset();
 		Module._findPath = origFindPath;
 
-		console.log( output );
-
-		resolve( formatOutput( output, codepath ) );
+		resolve( output );
 	} );
 };
