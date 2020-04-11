@@ -1,4 +1,3 @@
-const fs = require( 'fs' );
 const Module = require( 'module' );
 const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
@@ -6,7 +5,7 @@ const moduleAlias = require( 'module-alias' );
 /**
  * Convert an error message from the stylelint format into one acceptable for GitHub
  *
- * @param {Object} message
+ * @param {Object} message Data about a warning from stylelint.
  * @returns {Object}
  */
 const formatMessage = message => ( {
@@ -20,11 +19,12 @@ const formatMessage = message => ( {
 /**
  * Fetch a count of the total errors and warnings for our response.
  *
- * @param {Object} files
+ * @param {Object} files Formatted warnings against specific files.
  * @returns {{warnings: number, errors: number}}
  */
 const getTotals = ( files ) => {
-	const allErrors = Object.keys(files).reduce( ( accumulator, key ) => accumulator.concat( [ ...files[key] ] ), [] );
+	const allErrors = Object.keys( files )
+		.reduce( ( accumulator, key ) => accumulator.concat( [ ...files[key] ] ), [] );
 
 	return {
 		errors:   allErrors.filter( errorData => errorData.severity === 'error' ).length,
@@ -35,8 +35,8 @@ const getTotals = ( files ) => {
 /**
  * Properly Format the return for GitHub.
  *
- * @param {Object} data
- * @param {string} codepath
+ * @param {Object} data Raw data from stylelint Node runner.
+ * @param {String} codepath Path against which to check files.
  * @returns {{files: {}, totals: {warnings: number, errors: number}}}
  */
 const formatOutput = ( data, codepath ) => {
@@ -59,6 +59,12 @@ const formatOutput = ( data, codepath ) => {
 	return { totals: getTotals( files ), files };
 };
 
+/**
+ * Run stylelint checks.
+ *
+ * @param {String} standardPath Path against which to check files.
+ * @returns {() => Promise}
+ */
 module.exports = standardPath => codepath => {
 	const options = {
 		files: codepath,
@@ -85,7 +91,7 @@ module.exports = standardPath => codepath => {
 
 	const { lint } = require( '@runner-packages/stylelint' );
 
-	return new Promise( ( resolve, reject ) => {
+	return new Promise( resolve => {
 		let data;
 
 		try {
