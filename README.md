@@ -59,6 +59,10 @@ phpcs:
 eslint:
     enabled: true
     version: inherit
+
+stylelint:
+    enabled: false
+    version: inherit
 ```
 
 Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is available as a convenient shorthand for the latest published version, but note that this will be updated and may cause your code to fail future checks.
