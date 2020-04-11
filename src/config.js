@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
 		version: 'inherit',
 	},
 	stylelint: {
-		enabled: true,
+		enabled: false,
 		version: 'inherit',
 	},
 };
