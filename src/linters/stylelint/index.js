@@ -9,11 +9,11 @@ const moduleAlias = require( 'module-alias' );
  * @returns {Object}
  */
 const formatMessage = message => ( {
-	line:     message.line,
-	column:   message.column,
+	line: message.line,
+	column: message.column,
 	severity: message.severity,
-	message:  message.text,
-	source:   message.rule,
+	message: message.text,
+	source: message.rule,
 } );
 
 /**
@@ -27,7 +27,7 @@ const getTotals = ( files ) => {
 		.reduce( ( accumulator, key ) => accumulator.concat( [ ...files[key] ] ), [] );
 
 	return {
-		errors:   allErrors.filter( errorData => errorData.severity === 'error' ).length,
+		errors: allErrors.filter( errorData => errorData.severity === 'error' ).length,
 		warnings: allErrors.filter( errorData => errorData.severity === 'warning' ).length,
 	};
 };
