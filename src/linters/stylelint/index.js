@@ -101,7 +101,7 @@ module.exports = standardPath => codepath => {
 			throw err;
 		}
 
-		const output = data.then(resultObject => formatOutput( resultObject, codepath ));
+		const output = data.then( resultObject => formatOutput( resultObject, codepath ) );
 
 		// Reset path loader.
 		moduleAlias.reset();
