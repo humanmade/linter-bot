@@ -23,7 +23,7 @@ const formatMessage = message => ( {
  * @returns {{warnings: number, errors: number}}
  */
 const getTotals = ( files ) => {
-	const allErrors = Object.keys( files ).reduce( ( acc, key ) => [ ...acc, ...files[key] ], [] );
+	const allErrors = Object.keys( files ).reduce( ( acc, key ) => [ ...acc, ...files[ key ] ], [] );
 
 	return {
 		errors: allErrors.filter( errorData => errorData.severity === 'error' ).length,
