@@ -55,7 +55,10 @@ const formatOutput = ( data, codepath ) => {
 		files[ relPath ] = result.warnings.map( formatMessage );
 	} );
 
-	return { totals: getTotals( files ), files };
+	return {
+		totals: getTotals( files ),
+		files,
+	};
 };
 
 /**
