@@ -6,8 +6,9 @@ const tar = require( 'tar' );
 const available = {
 	eslint: require( './eslint' ),
 	phpcs: require( './phpcs' ),
+	stylelint: require( './stylelint' ),
 };
-const enabled = ( process.env.ENABLED_LINTERS || 'eslint,phpcs' ).split( ',' );
+const enabled = ( process.env.ENABLED_LINTERS || 'eslint,phpcs,stylelint' ).split( ',' );
 
 const STANDARDS_DIR = '/tmp/hmlinter-standards';
 const BASE_URL = process.env.STANDARD_URL || 'https://make.hmn.md/hmlinter/standards';
