@@ -1,6 +1,6 @@
 const Module = require( 'module' );
-const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
+const path = require( 'path' );
 
 /**
  * Convert an error message from the stylelint format into one acceptable for GitHub
