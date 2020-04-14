@@ -105,14 +105,14 @@ module.exports = standardPath => codepath => {
 			.then( resultObject => formatOutput( resultObject, codepath ) )
 			.catch( error => {
 				// code 78 is a configuration not found, which means we can't access @humanmade/stylelint-config.
-				// Run with our default configuration; most project only use this anyway.
+				// Run with our default configuration; most projects only use this anyway.
 				if ( error.code === 78 ) {
 					console.log( 'Running stylelint with default config on path', codepath );
 
 					return lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
 						.then( resultObject => formatOutput( resultObject, codepath ) );
 				} else {
-					console.log(error);
+					console.log( error );
 					throw error;
 				}
 			} );
