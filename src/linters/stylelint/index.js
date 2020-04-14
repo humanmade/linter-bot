@@ -41,6 +41,15 @@ const getTotals = ( files ) => {
  */
 const formatOutput = ( data, codepath ) => {
 	const files = {};
+
+	// There were no errors, simply bounce.
+	if ( ! data.errored ) {
+		return {
+			totals: 0,
+			files: [],
+		};
+	}
+
 	data.results.forEach( result => {
 		// Only parse through CSS or SCSS files.
 		if ( ! result.source.match( /\.s?css$/ ) ) {
