@@ -1,3 +1,4 @@
+const fs = require( 'fs' );
 const Module = require( 'module' );
 const moduleAlias = require( 'module-alias' );
 const path = require( 'path' );
@@ -70,44 +71,45 @@ const formatOutput = ( data, codepath ) => {
 module.exports = standardPath => codepath => {
 	const options = {
 		files: codepath,
+		configBasedir: `${ standardPath }node_modules`
 	};
 
-	// We need to use node_modules from the standard directory, but because
-	// we're not invoking stylelint over the CLI, we can't change where `require()`
-	// loads modules from unless we override the module loader.
+	// stylelint use `resolve-from` internally which looks at specific directories only for configs.
+	// We need to copy the files for our standard to the node_modules directory so that stylelint
+	// can correctly find our standard alongside the others.
 	//
-	// This ensures dependencies load from the standards instead, and the
-	// standard itself is loaded from the right place.
-	moduleAlias.addAlias( '@runner-packages', `${ standardPath }node_modules` );
-	moduleAlias.addAlias( '@humanmade/stylelint-config', standardPath );
+	// Copying the stylelint files so that stylelint can find and use our standard set alongside the others.
+	const actualStandardPath = `${ standardPath }/node_modules/@humanmade/stylelint-config`;
+	fs.mkdir( actualStandardPath, { recursive: true }, () => {
+		fs.copyFileSync( `${ standardPath }/package.json`, `${ actualStandardPath }/package.json` );
+		fs.copyFileSync( `${ standardPath }/.stylelintrc.json`, `${ actualStandardPath }/.stylelintrc.json` );
+	} );
 
-	const actualStandardPath = require.resolve( '@humanmade/stylelint-config' );
-	const origFindPath = Module._findPath;
-	Module._findPath = ( name, ...args ) => {
-		const path = origFindPath( name, ...args );
-		if ( ! path && name === '@humanmade/stylelint-config' ) {
-			return actualStandardPath;
-		}
-		return path;
-	};
+	moduleAlias.addAlias( '@runner-packages', `${ standardPath }node_modules` );
 
 	const { lint } = require( '@runner-packages/stylelint' );
 
 	return new Promise( resolve => {
-		let data;
+		let output;
 
-		try {
-			data = lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
-		} catch ( err ) {
-			console.log( err );
-			throw err;
-		}
+		output = lint( options )
+			.then( resultObject => formatOutput( resultObject, codepath ) )
+			.catch( error => {
+				// code 78 is a configuration not found, which means we can't access @humanmade/stylelint-config.
+				// Run with our default configuration; most project only use this anyway.
+				if ( error.code === 78 ) {
+					console.log( 'Running stylelint with default config on path', codepath );
 
-		const output = data.then( resultObject => formatOutput( resultObject, codepath ) );
+					return lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
+						.then( resultObject => formatOutput( resultObject, codepath ) );
+				} else {
+					console.log(error);
+					throw error;
+				}
+			} );
 
 		// Reset path loader.
 		moduleAlias.reset();
-		Module._findPath = origFindPath;
 
 		resolve( output );
 	} );
