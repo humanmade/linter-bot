@@ -27,7 +27,7 @@ Automatically run the [HM Coding standards](https://github.com/humanmade/coding-
 
 To enable on any repository on GitHub, simply [head to the app page](https://github.com/apps/hm-linter) and Install/Configure. You'll get an initial report as a new issue if you have any existing linting errors in your codebase.
 
-Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs or [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint.
+Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs, [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint, or [`.stylelintrc`](https://stylelint.io/user-guide/configure) for stylelint.
 
 See the [HM Coding standards](https://github.com/humanmade/coding-standards) documentation for how to configure specific rules.
 
@@ -70,7 +70,7 @@ Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is availa
 
 ## Development
 
-hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 6.10.
+hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 12.x.
 
 To get started on development of hm-linter:
 
@@ -173,6 +173,6 @@ Deployment settings can be changed using environment variables. In addition to t
 * `FORCE_STANDARD_PHPCS` - Standard to use for checking, overrides any user standard (default disabled)
 * `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
 * `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
-* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hmlinter`)
+* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hm-linter`)
 * `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
 * `FORCE_NEUTRAL_STATUS` - Mark failed checks as "neutral", which shows the check but does not mark it as failed (default disabled)
