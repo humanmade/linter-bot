@@ -72,17 +72,41 @@ const formatOutput = ( data, codepath ) => {
 	};
 };
 
+async function recursivelyGetFiles( dir ) {
+	const dirents = await fs.promises.readdir( dir, { withFileTypes: true } );
+
+	const files = await Promise.all( dirents.map( ( dirent ) => {
+		const res = path.resolve( dir, dirent.name );
+		return dirent.isDirectory() ? recursivelyGetFiles(res) : res;
+	}));
+
+	return Array.prototype.concat( ...files );
+}
+
+async function getFiles( dir ) {
+	const files = await recursivelyGetFiles( dir )
+	return files.filter( filename => filename.match( /.s?css$/ ) );
+}
+
 /**
  * Run stylelint checks.
  *
  * @param {String} standardPath Path against which to check files.
  * @returns {() => Promise}
  */
-module.exports = standardPath => codepath => {
+module.exports = async standardPath => async codepath => {
+	const files = await getFiles( codepath );
+
+	console.log( files );
+
 	const options = {
-		files: codepath,
-		configBasedir: `${ standardPath }node_modules`
+		files: files,
+		configBasedir: `${ standardPath }node_modules`,
 	};
+
+	if ( fs.existsSync( `${ codepath }/.stylelintignore` ) ) {
+		options.ignorePath = `${ codepath }/.stylelintignore`;
+	}
 
 	// stylelint use `resolve-from` internally which looks at specific directories only for configs.
 	// We need to copy the files for our standard to the node_modules directory so that stylelint
