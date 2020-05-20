@@ -1,5 +1,6 @@
 const fs = require( 'fs' );
 const Module = require( 'module' );
+const process = require( 'process' );
 const moduleAlias = require( 'module-alias' );
 const path = require( 'path' );
 
@@ -98,12 +99,21 @@ module.exports = standardPath => codepath => {
 
 	const { lint } = require( '@runner-packages/stylelint' );
 
+	const oldCwd = process.cwd();
+	try {
+		process.chdir( codepath );
+		console.log( '----- Cwd', process.cwd() );
+	} catch {
+		console.log( '----- Directory change failed' );
+	}
+
 	return new Promise( resolve => {
 		let output;
 
 		output = lint( options )
 			.then( resultObject => formatOutput( resultObject, codepath ) )
 			.catch( error => {
+
 				// code 78 is a configuration not found, which means we can't access @humanmade/stylelint-config.
 				// Run with our default configuration; most projects only use this anyway.
 				if ( error.code === 78 ) {
@@ -119,6 +129,7 @@ module.exports = standardPath => codepath => {
 
 		// Reset path loader.
 		moduleAlias.reset();
+		process.chdir( oldCwd );
 
 		resolve( output );
 	} );
