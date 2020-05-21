@@ -72,22 +72,6 @@ const formatOutput = ( data, codepath ) => {
 	};
 };
 
-async function recursivelyGetFiles( dir ) {
-	const dirents = await fs.promises.readdir( dir, { withFileTypes: true } );
-
-	const files = await Promise.all( dirents.map( ( dirent ) => {
-		const res = path.resolve( dir, dirent.name );
-		return dirent.isDirectory() ? recursivelyGetFiles(res) : res;
-	}));
-
-	return Array.prototype.concat( ...files );
-}
-
-async function getFiles( dir ) {
-	const files = await recursivelyGetFiles( dir )
-	return files.filter( filename => filename.match( /.s?css$/ ) );
-}
-
 /**
  * Run stylelint checks.
  *
@@ -95,18 +79,13 @@ async function getFiles( dir ) {
  * @returns {() => Promise}
  */
 module.exports = async standardPath => async codepath => {
-	const files = await getFiles( codepath );
-
-	console.log( files );
-
 	const options = {
-		files: files,
+		files: [
+			`${ codepath }/**/*.css`,
+			`${ codepath }/**/*.scss`,
+		],
 		configBasedir: `${ standardPath }node_modules`,
 	};
-
-	if ( fs.existsSync( `${ codepath }/.stylelintignore` ) ) {
-		options.ignorePath = `${ codepath }/.stylelintignore`;
-	}
 
 	// stylelint use `resolve-from` internally which looks at specific directories only for configs.
 	// We need to copy the files for our standard to the node_modules directory so that stylelint
@@ -120,23 +99,26 @@ module.exports = async standardPath => async codepath => {
 	} );
 
 	moduleAlias.addAlias( '@runner-packages', `${ standardPath }node_modules` );
-
 	const { lint } = require( '@runner-packages/stylelint' );
+	moduleAlias.reset();
 
 	const oldCwd = process.cwd();
 	try {
 		process.chdir( codepath );
-		console.log( '----- Cwd', process.cwd() );
 	} catch {
-		console.log( '----- Directory change failed' );
+		console.log( 'Stylelint cwd directory change failed' );
 	}
 
 	return new Promise( resolve => {
 		let output;
 
 		output = lint( options )
-			.then( resultObject => formatOutput( resultObject, codepath ) )
+			.then( resultObject => {
+				process.chdir( oldCwd );
+				return formatOutput( resultObject, codepath );
+			} )
 			.catch( error => {
+				process.chdir( oldCwd );
 
 				// code 78 is a configuration not found, which means we can't access @humanmade/stylelint-config.
 				// Run with our default configuration; most projects only use this anyway.
@@ -150,10 +132,6 @@ module.exports = async standardPath => async codepath => {
 					throw error;
 				}
 			} );
-
-		// Reset path loader.
-		moduleAlias.reset();
-		process.chdir( oldCwd );
 
 		resolve( output );
 	} );
