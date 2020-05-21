@@ -196,6 +196,11 @@ const formatAnnotations = ( state, baseUrl ) => {
 const formatMetadata = context => {
 	const { metadata, reqContext } = context;
 
+	// Short-circuit for `yarn start` requests which don't have the additional context needed.
+	if ( ! metadata || ! reqContext ) {
+		return '';
+	}
+
 	let body = '<details><summary>Request details</summary><ul>';
 	body += `\n<li><strong>GitHub Event ID:</strong> <code>${ metadata.headers['X-GitHub-Delivery'] }</code></li>`;
 	body += `\n<li><strong>API Gateway ID:</strong> <code>${ metadata.requestContext.requestId }</code></li>`;
