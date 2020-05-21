@@ -1,5 +1,4 @@
 const fs = require( 'fs' );
-const Module = require( 'module' );
 const process = require( 'process' );
 const moduleAlias = require( 'module-alias' );
 const path = require( 'path' );
@@ -78,7 +77,7 @@ const formatOutput = ( data, codepath ) => {
  * @param {String} standardPath Path against which to check files.
  * @returns {() => Promise}
  */
-module.exports = async standardPath => async codepath => {
+module.exports = standardPath => codepath => {
 	const options = {
 		files: [
 			`${ codepath }/**/*.css`,
@@ -118,16 +117,19 @@ module.exports = async standardPath => async codepath => {
 				return formatOutput( resultObject, codepath );
 			} )
 			.catch( error => {
-				process.chdir( oldCwd );
-
 				// code 78 is a configuration not found, which means we can't access @humanmade/stylelint-config.
 				// Run with our default configuration; most projects only use this anyway.
 				if ( error.code === 78 ) {
 					console.log( 'Running stylelint with default config on path', codepath );
 
-					return lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
+					const results = lint( { ...options, configFile: `${ standardPath }/.stylelintrc.json` } )
 						.then( resultObject => formatOutput( resultObject, codepath ) );
+
+					process.chdir( oldCwd );
+
+					return results;
 				} else {
+					process.chdir( oldCwd );
 					console.log( error );
 					throw error;
 				}
