@@ -7,4 +7,18 @@ const bot = probot.create();
 bot.load( require( './src' ) );
 
 // Lambda Handler
-module.exports.probotHandler = probot.buildHandler( bot );
+const handler = probot.buildHandler( bot );
+module.exports.probotHandler = function ( event, context, callback ) {
+	switch ( event.path ) {
+		// Pass check requests to HTTP.
+		case '/check':
+			const http = require( './src/http' );
+			http( event, context, callback )
+				.then( res => callback( null, res ) )
+				.catch( err => callback( err ) );
+			return;
+
+		default:
+			return handler( event, context, callback );
+	}
+};
