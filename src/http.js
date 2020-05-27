@@ -30,11 +30,10 @@ module.exports = async ( event, context ) => {
 	console.log( event );
 	try {
 		if ( ! event.body ) {
-			console.log( 'no body' );
 			throw new ClientError( 'no_body', 'Missing body.' );
 		}
 
-		const data = new URLSearchParams( event.body );;
+		const data = new URLSearchParams( event.body );
 		let filename = data.get( 'filename' );
 
 		// Set default filename based on type.
@@ -55,7 +54,7 @@ module.exports = async ( event, context ) => {
 		const sanitizedFilename = filename.replace( /[^a-z0-9_\-.\/]+/gi, '' ).replace( /\.\//gi, '' );
 		if ( sanitizedFilename !== filename ) {
 			console.warn( 'Attempt to escape root' );
-			console.log( filename );
+			console.warn( filename );
 			throw new ClientError( 'no_file', 'Invalid filename.' );
 		}
 
@@ -70,7 +69,7 @@ module.exports = async ( event, context ) => {
 				const nextPart = fnParts.shift();
 				if ( nextPart === '..' || nextPart === '.' ) {
 					console.warn( 'Attempt to escape root' );
-					console.log( filename );
+					console.warn( filename );
 					throw new ClientError( 'invalid_path', 'Invalid path part' );
 				}
 
@@ -80,8 +79,8 @@ module.exports = async ( event, context ) => {
 		}
 
 		// Write code to the path.
-		const res = await pify( fs.writeFile )( path.join( dir, sanitizedFilename ), data.get( 'code' ) );
 		console.log( path.join( dir, sanitizedFilename ), res );
+		const res = await pify( fs.writeFile )( path.join( dir, sanitizedFilename ), data.get( 'code' ) );
 
 		// Then, prepare the linters.
 		const config = {
