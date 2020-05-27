@@ -8,8 +8,12 @@ const DEFAULT_CONFIG = {
 		enabled: true,
 		version: 'inherit',
 	},
+	stylelint: {
+		enabled: false,
+		version: 'inherit',
+	},
 };
-const FILENAME = 'hmlinter.yml';
+const FILENAME = process.env.CONFIG_FILE || 'hmlinter.yml';
 
 module.exports = async context => {
 	return await context.config( FILENAME, DEFAULT_CONFIG );

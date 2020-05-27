@@ -27,7 +27,7 @@ Automatically run the [HM Coding standards](https://github.com/humanmade/coding-
 
 To enable on any repository on GitHub, simply [head to the app page](https://github.com/apps/hm-linter) and Install/Configure. You'll get an initial report as a new issue if you have any existing linting errors in your codebase.
 
-Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs or [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint.
+Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs, [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint, or [`.stylelintrc`](https://stylelint.io/user-guide/configure) for stylelint.
 
 See the [HM Coding standards](https://github.com/humanmade/coding-standards) documentation for how to configure specific rules.
 
@@ -59,6 +59,10 @@ phpcs:
 eslint:
     enabled: true
     version: inherit
+
+stylelint:
+    enabled: false
+    version: inherit
 ```
 
 Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is available as a convenient shorthand for the latest published version, but note that this will be updated and may cause your code to fail future checks.
@@ -66,7 +70,7 @@ Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is availa
 
 ## Development
 
-hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 6.10.
+hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 12.x.
 
 To get started on development of hm-linter:
 
@@ -74,11 +78,13 @@ To get started on development of hm-linter:
 2. `npm install` or `yarn install` the dependencies
 
 
-### Testing
+## Testing
 
 ### Live Testing
 
 The easiest and best way to test hm-linter is to run the bot in development mode. This will run the bot locally, and uses a proxy to forward all webhook events from GitHub.
+
+`yarn start` will run a development copy of the linter bot inside a Lambda-like Docker container.
 
 To set this up:
 
@@ -102,6 +108,21 @@ A typical development process looks like this:
 6. If your code worked, you're done 🙌
 7. If your code didn't work, kill the bot
 8. Repeat steps 2-7 until your code works.
+
+
+### Testing Payloads
+
+You can test API Gateway payloads against a simulated Lambda environment (again using Docker) to do so:
+
+```sh
+# Run build at least once to download the bin and lib directories
+yarn run build
+
+# Pass a payload to the test command
+yarn run test < fixtures/lambda-test-event.json
+```
+
+**Note:** The format of this JSON data **must** be in API Gateway format; you typically want to copy this from CloudWatch Logs. If you get an `Cannot read property 'x-github-event' of undefined` error, you're passing a GitHub event instead.
 
 
 ### Simulation
@@ -167,9 +188,6 @@ You can then run the handler against a simulated Lambda environment locally:
 # Run build at least once:
 npm run build
 
-# Or run in watch mode if making local changes:
-# npm run build:babel-watch
-
 # Run the handler.
 npm run test < deadbeef-badd-ecaf-dead-beefbaddecaf.json
 ```
@@ -187,7 +205,21 @@ To deploy hm-linter, you need the following things:
 Deployment can be done in one step by running the `deploy` script, but you should generally test builds first. The following scripts will help with that:
 
 * `build` - Builds JS, downloads PHP binary, and installs Composer/npm dependencies.
-* `build:babel-watch` - Builds JS and rebuilds if changed.
 * `deploy:package` - Builds the directory into a zip. Use this to verify the ZIP before pushing.
 * `deploy:push` - Push the built zip to Lambda. Use this if `deploy` fails due to some sort of network error.
-* `test` - Run the index handler against a simulated Lambda environment. See above for how to use.
+
+
+## Advanced Configuration
+
+Deployment settings can be changed using environment variables. In addition to the app settings noted above, the following can also be set:
+
+* `BOT_NAME` - Name of the bot (default `hmlinter`)
+* `CONFIG_FILE` - Name of the configuration file (default `hmlinter.yml`)
+* `STANDARD_URL` - URL for the standards directory (default `https://make.hmn.md/hmlinter/standards`)
+* `ENABLED_LINTERS` - Comma-separated string of enabled linter types (default `eslint,phpcs`)
+* `FORCE_STANDARD_PHPCS` - Standard to use for checking, overrides any user standard (default disabled)
+* `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
+* `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
+* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hm-linter`)
+* `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
+* `FORCE_NEUTRAL_STATUS` - Mark failed checks as "neutral", which shows the check but does not mark it as failed (default disabled)

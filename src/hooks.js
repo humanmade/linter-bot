@@ -49,7 +49,7 @@ const onAdd = async context => {
 		github.issues.create( {
 			owner,
 			repo: repo.name,
-			title: `Hello from hm-linter! (${ summary })`,
+			title: `Hello from ${ process.env.BOT_NAME || 'hmlinter' }! (${ summary })`,
 			body,
 		} );
 	} );
@@ -73,7 +73,7 @@ const onPush = async context => {
 			owner,
 			repo,
 			sha:     commit,
-			context: 'hmlinter',
+			context: process.env.BOT_NAME || 'hmlinter',
 			state,
 			description: description.substr( 0,139 ),
 			target_url: logUrl,
@@ -133,7 +133,7 @@ const onCheck = async context => {
 			accept: 'application/vnd.github.antiope-preview+json',
 		},
 		input: {
-			name: 'hmlinter',
+			name: process.env.BOT_NAME || 'hmlinter',
 			head_branch,
 			head_sha,
 			started_at: ( new Date() ).toISOString(),
@@ -190,9 +190,9 @@ const onCheck = async context => {
 	} catch ( e ) {
 		console.log(e)
 		completeRun(
-			'failure',
+			process.env.FORCE_NEUTRAL_STATUS ? 'neutral' : 'failure',
 			{
-				title: 'Failed to run hmlinter',
+				title: `Failed to run ${ process.env.BOT_NAME || 'hmlinter' }`,
 				summary: `Could not run: ${ e }`,
 				output: JSON.stringify( serializeError( e ), null, 2 )
 			}
@@ -200,7 +200,39 @@ const onCheck = async context => {
 		throw e;
 	}
 
-	if ( lintState.passed ) {
+	if ( process.env.FORCE_NEUTRAL_STATUS ) {
+		console.log( 'Setting status to neutral' );
+		let gistUrl;
+		try {
+			gistUrl = await createGist(
+				`${ owner }/${ repo.name }@${ head_sha }`,
+				'output.json',
+				formatDetails( lintState )
+			);
+		} catch ( e ) {
+			console.log( 'Triggered error' );
+			console.log( e );
+			completeRun(
+				'neutral',
+				{
+					title: `Failed to run ${ process.env.BOT_NAME || 'hmlinter' }`,
+					summary: `Could not run: ${ e }`,
+					output: JSON.stringify( serializeError( e ), null, 2 )
+				}
+			);
+			throw e;
+		}
+
+		const summary = formatSummary( lintState );
+		const fullSummary = summary + `\n\n[View output](${ gistUrl })`;
+		completeRun(
+			'neutral',
+			{
+				title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
+				summary: fullSummary,
+			}
+		);
+	} else if ( lintState.passed ) {
 		completeRun(
 			'success',
 			{
@@ -225,7 +257,7 @@ const onCheck = async context => {
 		completeRun(
 			'failure',
 			{
-				title: 'hmlinter checks failed',
+				title: `${ process.env.BOT_NAME || 'hmlinter' } checks failed`,
 				summary: formatSummary( lintState ),
 				annotations: lastGroup,
 			}
