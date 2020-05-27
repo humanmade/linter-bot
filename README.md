@@ -110,60 +110,13 @@ A typical development process looks like this:
 8. Repeat steps 2-7 until your code works.
 
 
-### Testing Payloads
-
-You can test API Gateway payloads against a simulated Lambda environment (again using Docker) to do so:
-
-```sh
-# Run build at least once to download the bin and lib directories
-yarn run build
-
-# Pass a payload to the test command
-yarn run test < fixtures/lambda-test-event.json
-```
-
-**Note:** The format of this JSON data **must** be in API Gateway format; you typically want to copy this from CloudWatch Logs. If you get an `Cannot read property 'x-github-event' of undefined` error, you're passing a GitHub event instead.
-
-
-### Simulation
-
-This repo also includes fixtures for specific events, and you can use Probot's simulation mode to test these. This simulates a webhook request from GitHub, **but uses the live GitHub API**, so be careful. Generally, you should use live testing instead, as it's more powerful. The fixture data included in the repo is from a test repository (rmccue/test-linter).
-
-Note also that both a `.env` and private key are required. You can create your own GitHub App to get these, or ping me (@rmccue) to get the details for `hmlinter`.
-
-Your private key should be saved as `private-key.pem`, and your `.env` should contain this:
-
-```
-APP_ID=5455
-WEBHOOK_SECRET=development
-GIST_ACCESS_TOKEN=...
-```
-
-(You will need to generate your own `GIST_ACCESS_TOKEN`: this is a GitHub personal access token with `gist` scope.)
-
-To test a `push` webhook:
-
-```
-node_modules/.bin/probot simulate push fixtures/push.json ./plugin/linter.js
-```
-
-To test a `pull_request.open` webhook:
-
-```
-node_modules/.bin/probot simulate pull_request fixtures/pull_request.opened.json ./plugin/linter.js
-```
-
-To test a `pull_request.synchronize` webhook:
-
-```
-node_modules/.bin/probot simulate pull_request fixtures/pull_request.synchronize.json ./plugin/linter.js
-```
-
 ### Replicating production issues
 
-The first step to replicating production issues is to understand the request being sent to hm-linter.
+The first step to replicating production issues is to understand the request being sent to hm-linter. Note that when running against these events, you are **testing against the live GitHub API**, so be careful.
 
-Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command and passing the Lambda (request) ID.
+Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command.
+
+Each check status page lists the various request IDs. The **Lambda ID** is the ID you need for pulling down the relevant logs and data.
 
 This will write the logs to `{id}.log`, and save the raw data to `{id}.json`.
 
@@ -182,7 +135,7 @@ Log saved to:           deadbeef-badd-ecaf-dead-beefbaddecaf.log
 Raw data saved to:      deadbeef-badd-ecaf-dead-beefbaddecaf.json
 ```
 
-You can then run the handler against a simulated Lambda environment locally:
+You can then run the handler against a simulated Lambda environment locally (using Docker):
 
 ```
 # Run build at least once:
@@ -191,6 +144,9 @@ npm run build
 # Run the handler.
 npm run test < deadbeef-badd-ecaf-dead-beefbaddecaf.json
 ```
+
+**Note:** The format of the JSON data passed to `test` **must** be in API Gateway format (i.e. from the get-logs script). If you get an `Cannot read property 'x-github-event' of undefined` error, you're passing a GitHub event instead (i.e. from Smee).
+
 
 ### Deployment
 
