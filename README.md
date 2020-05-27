@@ -78,11 +78,13 @@ To get started on development of hm-linter:
 2. `npm install` or `yarn install` the dependencies
 
 
-### Testing
+## Testing
 
 ### Live Testing
 
 The easiest and best way to test hm-linter is to run the bot in development mode. This will run the bot locally, and uses a proxy to forward all webhook events from GitHub.
+
+`yarn start` will run a development copy of the linter bot inside a Lambda-like Docker container.
 
 To set this up:
 
@@ -106,6 +108,21 @@ A typical development process looks like this:
 6. If your code worked, you're done 🙌
 7. If your code didn't work, kill the bot
 8. Repeat steps 2-7 until your code works.
+
+
+### Testing Payloads
+
+You can test API Gateway payloads against a simulated Lambda environment (again using Docker) to do so:
+
+```sh
+# Run build at least once to download the bin and lib directories
+yarn run build
+
+# Pass a payload to the test command
+yarn run test < fixtures/lambda-test-event.json
+```
+
+**Note:** The format of this JSON data **must** be in API Gateway format; you typically want to copy this from CloudWatch Logs. If you get an `Cannot read property 'x-github-event' of undefined` error, you're passing a GitHub event instead.
 
 
 ### Simulation
@@ -157,9 +174,6 @@ Deployment can be done in one step by running the `deploy` script, but you shoul
 * `build` - Builds JS, downloads PHP binary, and installs Composer/npm dependencies.
 * `deploy:package` - Builds the directory into a zip. Use this to verify the ZIP before pushing.
 * `deploy:push` - Push the built zip to Lambda. Use this if `deploy` fails due to some sort of network error.
-* `test` - Run the index handler against a simulated Lambda environment. Before running this:
-	* Run `build` at least once
-	* Set the `AWS_LAMBDA_EVENT_BODY` environment variable to the contents of `fixtures/lambda-test-event.json` (`cat fixtures/lambda-test-event.json | read -z AWS_LAMBDA_EVENT_BODY`)
 
 
 ## Advanced Configuration
