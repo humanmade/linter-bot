@@ -41,7 +41,7 @@ module.exports = async ( context, head ) => {
 		const res = await context.github.repos.getContent( params );
 		const config = yaml.safeLoad( Buffer.from( res.data.content, 'base64' ).toString() ) || {};
 		return {
-			...defaultConfig,
+			...DEFAULT_CONFIG,
 			...config
 		};
 	} catch ( err ) {
