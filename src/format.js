@@ -283,7 +283,7 @@ const formatWelcome = ( state, gistUrl ) => {
 };
 
 /**
- * Convert the whole results of a linting run into a JSON string.
+ * Convert the whole results of a linting run into a JSON string for debugging.
  *
  * @param {Object} state Results of a linting run.
  * @returns {string}
