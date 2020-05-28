@@ -43,9 +43,12 @@ const formatOutput = ( data, codepath ) => {
 	const files = {};
 
 	// There were no errors, simply bounce.
-	if ( ! data.errored ) {
+	if ( ! data.maxWarningsExceeded || data.maxWarningsExceeded.foundWarnings.length < 1 ) {
 		return {
-			totals: 0,
+			totals: {
+				errors: 0,
+				warnings: 0,
+			},
 			files: [],
 		};
 	}
@@ -84,6 +87,8 @@ module.exports = standardPath => codepath => {
 			`${ codepath }/**/*.scss`,
 		],
 		configBasedir: `${ standardPath }node_modules`,
+		// Force a count of all warnings and errors from the Node return.
+		maxWarnings: 0,
 	};
 
 	// stylelint use `resolve-from` internally which looks at specific directories only for configs.
