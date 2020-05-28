@@ -27,7 +27,7 @@ function combineLinters( results ) {
 }
 
 /**
- * Create a GitHub Gist for displaying messages in the gitHub UI.
+ * Create a GitHub Gist (used for logging raw lint data).
  *
  * @param {String} description A descriptive name for this gist.
  * @param {String} filename    Filename for the gist.
