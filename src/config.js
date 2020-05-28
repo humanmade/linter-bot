@@ -32,7 +32,6 @@ module.exports = async ( context, head ) => {
 	const params = {
 		...context.repo( {
 			path: path.posix.join( '.github', FILENAME ),
-			foo: 'bar',
 		} ),
 		ref: head,
 	};
