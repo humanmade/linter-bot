@@ -71,7 +71,7 @@ const formatComparison = comparison => {
 };
 
 /**
- * Fetch linting results broken out by filename.
+ * Group linting results by filename.
  *
  * @param {Object} combined Object of all linting comments against a file set.
  * @returns {Object} Linting results broken out by filename.
