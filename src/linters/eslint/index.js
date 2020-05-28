@@ -4,7 +4,7 @@ const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
 
 /**
- * Format message data into a consistent format for usage in formatOutput.
+ * Convert a ESLint error into formatOutput-style results.
  *
  * @param {Object} message Raw message data from eslint.
  * @returns {Object}
@@ -20,7 +20,7 @@ const formatMessage = message => {
 };
 
 /**
- * Organize all output from eslint for Linter ingestion.
+ * Convert ESLint results into common output format.
  *
  * @param {Object} data     Warnings and errors from eslint.
  * @param {String} codepath Path to the code getting linted.

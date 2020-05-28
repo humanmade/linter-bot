@@ -13,7 +13,9 @@ const STANDARDS_DIR = '/tmp/hmlinter-standards';
 const BASE_URL = process.env.STANDARD_URL || 'https://make.hmn.md/hmlinter/standards';
 
 /**
- * Fetch a file with a given path.
+ * Send a HTTP request.
+ *
+ * Promisified version of Node's https.get
  *
  * @param args Arguments available to https.get. See https://nodejs.org/api/https.html#https_https_get_url_options_callback
  * @returns {Promise<any>}
@@ -54,7 +56,7 @@ const downloadFile = async ( url, filename ) => {
 };
 
 /**
- * Prepare a linter for use in parsing files.
+ * Download and build a linter instance.
  *
  * @param {String} linter  Which linter to setup.
  * @param {String} version Standards version to use.
