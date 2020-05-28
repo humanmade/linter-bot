@@ -11,7 +11,7 @@ const CONFIG_NAMES = [
 ];
 
 /**
- * Format message data into a consistent format for usage in formatOutput.
+ * Convert a phpcs error into formatOutput-style results.
  *
  * @param {Object} message Raw message data from PHPCS.
  * @returns {Object}
