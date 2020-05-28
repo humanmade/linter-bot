@@ -82,10 +82,7 @@ const formatOutput = ( data, codepath ) => {
  */
 module.exports = standardPath => codepath => {
 	const options = {
-		files: [
-			`${ codepath }/**/*.css`,
-			`${ codepath }/**/*.scss`,
-		],
+		files: codepath,
 		configBasedir: `${ standardPath }node_modules`,
 		// Force a count of all warnings and errors from the Node return.
 		maxWarnings: 0,
