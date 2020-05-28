@@ -6,7 +6,7 @@ const githubApi = require( '@octokit/rest' );
 const GIST_ACCESS_TOKEN = process.env.GIST_ACCESS_TOKEN || null;
 
 /**
- * Assemble all linter results into an object broken out by linter type.
+ * Combine results-by-linter into a single results object.
  *
  * @param {Array} results Results from linting.
  * @returns {*}
