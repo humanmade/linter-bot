@@ -30,7 +30,7 @@ const formatMessage = message => {
 };
 
 /**
- * Organize all output from PHPCS for Linter ingestion.
+ * Convert phpcs results into common output format.
  *
  * @param {Object} data     Warnings and errors from PHPCS.
  * @param {String} codepath Path to the code getting linted.
