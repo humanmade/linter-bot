@@ -18,6 +18,7 @@
     "run.env": "^1.1.0"
   },
   "scripts": {
+    "build:babel-watch": "babel src --out-dir build --ignore src/linters/phpcs/vendor -D -w",
     "build:bin": "aws s3 sync s3://hm-linter/bin ./bin && chmod +x ./bin/*",
     "build:lib": "aws s3 sync s3://hm-linter/lib ./lib && chmod +x ./lib/*",
     "build:npm": "docker run --rm -v \"${PWD}\":/var/task lambci/lambda:build-nodejs12.x npm install",
