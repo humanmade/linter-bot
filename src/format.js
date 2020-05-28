@@ -34,7 +34,7 @@ const formatSummary = status => {
 };
 
 /**
- * Format a string that compares a previous an current code changesets.
+ * Format a string that compares previous and current check runs.
  *
  * @param {Object} comparison Comparison details.
  * @returns {string} Concatenated comparison results string.
