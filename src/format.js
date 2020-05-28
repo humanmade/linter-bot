@@ -268,6 +268,8 @@ const formatMetadata = context => {
 /**
  * Format a welcome message for users who have just activated the bot on the repo.
  *
+ * @todo:: fix this as it is broken atm.
+ *
  * @param {Object} state   Results of a linting run.
  * @param {String} gistUrl URL of the gist where the cumulative initial results are stored.
  * @returns {string} Welcome data.

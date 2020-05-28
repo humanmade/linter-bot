@@ -63,7 +63,6 @@ const formatOutput = ( data, codepath ) => {
  * Run PHPCS linting.
  *
  * @param {String} standardPath Path to custom standard set.
- * @returns {function(*=): Promise<any | never>}
  */
 module.exports = standardPath => codepath => {
 	const phpcsPath = path.join( standardPath, 'vendor', 'bin', 'phpcs' );

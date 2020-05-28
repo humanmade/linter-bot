@@ -89,7 +89,6 @@ const DEFAULT_STANDARD = process.env.DEFAULT_STANDARD_ESLINT || 'eslint-config-h
  * Run eslint linting.
  *
  * @param {String} standardPath Path to custom standard set.
- * @returns {function(*=): Promise<any>}
  */
 module.exports = standardPath => codepath => {
 	const options = {
