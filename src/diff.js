@@ -1,7 +1,7 @@
 const parseDiff = require( 'parse-diff' );
 
 /**
- * Fetch which files are different in a particular push changeset.
+ * Work out which files and lines are contained in this PR.
  *
  * @param {Object} pushConfig Data about the push being evaluated.
  * @param {Number} number     Run number.
