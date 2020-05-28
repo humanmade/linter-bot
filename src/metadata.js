@@ -6,7 +6,7 @@
 const regex = /\n\n<!-- hm-linter = (.*) -->/;
 
 /**
- * Convert an HM Linter HTML comment into a JSON object.
+ * Parse HM Linter data from HTML comment text.
  *
  * @param {String} text Original text.
  * @returns {Object}
