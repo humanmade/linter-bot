@@ -32,7 +32,7 @@ const onAdd = async context => {
 		};
 		let lintState;
 		try {
-			lintState = await runForRepo( pushConfig, getConfig( context ), github );
+			lintState = await runForRepo( pushConfig, getConfig( context, branch.data.commit.sha ), github );
 		} catch ( e ) {
 			console.log( e );
 			throw e;
@@ -86,7 +86,7 @@ const onPush = async context => {
 	let lintState;
 	let logUrl = '';
 	try {
-		lintState = await runForRepo( pushConfig, getConfig( context ), github );
+		lintState = await runForRepo( pushConfig, getConfig( context, commit ), github );
 	} catch ( e ) {
 		console.log(e)
 		logUrl = await createGist(
@@ -186,7 +186,7 @@ const onCheck = async context => {
 	const pushConfig = { commit: head_sha, owner, repo };
 	let lintState;
 	try {
-		lintState = await runForRepo( pushConfig, getConfig( context ), github );
+		lintState = await runForRepo( pushConfig, getConfig( context, head_sha ), github );
 	} catch ( e ) {
 		console.log(e)
 		completeRun(
@@ -279,7 +279,7 @@ const onOpenPull = async context => {
 	let diffMapping, lintState;
 	try {
 		[ lintState, diffMapping ] = await Promise.all([
-			runForRepo( pushConfig, getConfig( context ), github ),
+			runForRepo( pushConfig, getConfig( context, commit ), github ),
 			getDiffMapping( pushConfig, payload.number, github ),
 		]);
 	} catch ( e ) {
@@ -331,7 +331,7 @@ const onUpdatePull = async context => {
 	let diffMapping, lintState, previousState;
 	try {
 		[ lintState, diffMapping, previousState ] = await Promise.all([
-			runForRepo( pushConfig, getConfig( context ), github ),
+			runForRepo( pushConfig, getConfig( context, commit ), github ),
 			getDiffMapping( pushConfig, payload.number, github ),
 			getPreviousRun( github, owner, repo, payload.number ),
 		]);
