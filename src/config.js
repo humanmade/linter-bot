@@ -1,6 +1,11 @@
 const yaml = require( 'js-yaml' );
 const path = require( 'path' );
 
+/**
+ * Default configuration.
+ *
+ * @type {Object}
+ */
 const DEFAULT_CONFIG = {
 	version: 'latest',
 	phpcs: {
@@ -16,6 +21,14 @@ const DEFAULT_CONFIG = {
 		version: 'inherit',
 	},
 };
+
+/**
+ * Filename by which to find a custom configuration in a project.
+ *
+ * This can be customized by setting the CONFIG_FILE environment variable.
+ *
+ * @type {string}
+ */
 const FILENAME = process.env.CONFIG_FILE || 'hmlinter.yml';
 
 /**

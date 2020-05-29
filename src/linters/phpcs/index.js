@@ -10,6 +10,12 @@ const CONFIG_NAMES = [
 	'phpcs.ruleset.xml',
 ];
 
+/**
+ * Convert a phpcs error into formatOutput-style results.
+ *
+ * @param {Object} message Raw message data from PHPCS.
+ * @returns {Object}
+ */
 const formatMessage = message => {
 	const details = `<details><summary>Error details</summary><code>${message.source}</code> from phpcs</details>`;
 	const text = `${message.message}`;
@@ -23,6 +29,13 @@ const formatMessage = message => {
 	};
 };
 
+/**
+ * Convert phpcs results into common output format.
+ *
+ * @param {Object} data     Warnings and errors from PHPCS.
+ * @param {String} codepath Path to the code getting linted.
+ * @returns {{files, totals: {warnings: *, errors: *}}}
+ */
 const formatOutput = ( data, codepath ) => {
 	const totals = {
 		errors: 0,
@@ -46,6 +59,11 @@ const formatOutput = ( data, codepath ) => {
 	return { totals, files };
 };
 
+/**
+ * Run PHPCS linting.
+ *
+ * @param {String} standardPath Path to custom standard set.
+ */
 module.exports = standardPath => codepath => {
 	const phpcsPath = path.join( standardPath, 'vendor', 'bin', 'phpcs' );
 
@@ -84,7 +102,6 @@ module.exports = standardPath => codepath => {
 			installedPaths.push( 'vendor/automattic/vipwpcs' );
 		}
 
-		// const standard = 'PSR2'; //...
 		const args = [
 			phpcsPath,
 			'-q',

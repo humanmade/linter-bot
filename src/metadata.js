@@ -1,5 +1,16 @@
+/**
+ * Regex pattern for evaluating HM Linter comments and pulling a JSON blob out.
+ *
+ * @type {RegExp}
+ */
 const regex = /\n\n<!-- hm-linter = (.*) -->/;
 
+/**
+ * Parse HM Linter data from HTML comment text.
+ *
+ * @param {String} text Original text.
+ * @returns {Object}
+ */
 function parse( text ) {
 	const match = text.replace( /\r\n/g, '\n' ).match( regex );
 	if ( ! match ) {
@@ -9,6 +20,12 @@ function parse( text ) {
 	return JSON.parse( match[1] );
 }
 
+/**
+ * Convert a JSON object into an HTML comment for HM Linter.
+ *
+ * @param {Object} data Data to convert.
+ * @returns {string}
+ */
 function serialize( data ) {
 	return `\n\n<!-- hm-linter = ${JSON.stringify(data)} -->`;
 }

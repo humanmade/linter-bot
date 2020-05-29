@@ -5,6 +5,12 @@ const githubApi = require( '@octokit/rest' );
 
 const GIST_ACCESS_TOKEN = process.env.GIST_ACCESS_TOKEN || null;
 
+/**
+ * Combine results-by-linter into a single results object.
+ *
+ * @param {Array} results Results from linting.
+ * @returns {*}
+ */
 function combineLinters( results ) {
 	return results
 		.map( linter => linter.files )
@@ -20,6 +26,14 @@ function combineLinters( results ) {
 		}, {} );
 }
 
+/**
+ * Create a GitHub Gist (used for logging raw lint data).
+ *
+ * @param {String} description A descriptive name for this gist.
+ * @param {String} filename    Filename for the gist.
+ * @param {String} content     The content of the file.
+ * @returns {Promise<*>}
+ */
 const createGist = async ( description, filename, content ) => {
 	if ( ! GIST_ACCESS_TOKEN ) {
 		console.warn( 'Missing GIST_ACCESS_TOKEN for Gist creation' );
