@@ -5,4 +5,5 @@ node_modules
 probot/
 src/linters/phpcs/vendor
 bin/
+lib/
 event.json

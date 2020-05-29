@@ -1,3 +1,6 @@
+const yaml = require( 'js-yaml' );
+const path = require( 'path' );
+
 /**
  * Default configuration.
  *
@@ -13,6 +16,10 @@ const DEFAULT_CONFIG = {
 		enabled: true,
 		version: 'inherit',
 	},
+	stylelint: {
+		enabled: false,
+		version: 'inherit',
+	},
 };
 
 /**
@@ -25,11 +32,35 @@ const DEFAULT_CONFIG = {
 const FILENAME = process.env.CONFIG_FILE || 'hmlinter.yml';
 
 /**
- * Merges a custom linter file (if any) with our default configuration.
+ * Reads the app configuration from the given YAML file in the `.github`
+ * directory of the repository.
  *
- * @param {Object} context
- * @returns {Promise<Object|*>}
+ * @internal Ported from probot, but adapted to read from the current branch.
+ *
+ * @param context Context from Probot
+ * @param head SHA of the head commit we're running against.
+ * @return Configuration object read from the file
  */
-module.exports = async context => {
-	return await context.config( FILENAME, DEFAULT_CONFIG );
+module.exports = async ( context, head ) => {
+	const params = {
+		...context.repo( {
+			path: path.posix.join( '.github', FILENAME ),
+		} ),
+		ref: head,
+	};
+
+	try {
+		const res = await context.github.repos.getContent( params );
+		const config = yaml.safeLoad( Buffer.from( res.data.content, 'base64' ).toString() ) || {};
+		return {
+			...DEFAULT_CONFIG,
+			...config
+		};
+	} catch ( err ) {
+		if ( err.code === 404 ) {
+			return DEFAULT_CONFIG;
+		} else {
+			throw err;
+		}
+	}
 };

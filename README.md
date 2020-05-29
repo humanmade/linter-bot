@@ -27,7 +27,7 @@ Automatically run the [HM Coding standards](https://github.com/humanmade/coding-
 
 To enable on any repository on GitHub, simply [head to the app page](https://github.com/apps/hm-linter) and Install/Configure. You'll get an initial report as a new issue if you have any existing linting errors in your codebase.
 
-Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs or [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint.
+Every repository is different, and you might want to customise the rules that the linter runs. Good news: you can do just that. hm-linter detects custom configuration files automatically, just create a `phpcs.ruleset.xml` file for phpcs, [`eslintrc.*`](https://eslint.org/docs/user-guide/configuring#configuration-file-formats) file for ESLint, or [`.stylelintrc`](https://stylelint.io/user-guide/configure) for stylelint.
 
 See the [HM Coding standards](https://github.com/humanmade/coding-standards) documentation for how to configure specific rules.
 
@@ -59,6 +59,10 @@ phpcs:
 eslint:
     enabled: true
     version: inherit
+
+stylelint:
+    enabled: false
+    version: inherit
 ```
 
 Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is available as a convenient shorthand for the latest published version, but note that this will be updated and may cause your code to fail future checks.
@@ -66,7 +70,7 @@ Versions **MUST** be specified in full format (i.e. `0.5.0`). `latest` is availa
 
 ## Development
 
-hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 6.10.
+hm-linter is a GitHub bot built on top of the [Probot framework](https://probot.github.io/). It runs on Lambda, which runs Node 12.x.
 
 To get started on development of hm-linter:
 
@@ -74,11 +78,13 @@ To get started on development of hm-linter:
 2. `npm install` or `yarn install` the dependencies
 
 
-### Testing
+## Testing
 
 ### Live Testing
 
 The easiest and best way to test hm-linter is to run the bot in development mode. This will run the bot locally, and uses a proxy to forward all webhook events from GitHub.
+
+`yarn start` will run a development copy of the linter bot inside a Lambda-like Docker container.
 
 To set this up:
 
@@ -104,39 +110,43 @@ A typical development process looks like this:
 8. Repeat steps 2-7 until your code works.
 
 
-### Simulation
+### Replicating production issues
 
-This repo also includes fixtures for specific events, and you can use Probot's simulation mode to test these. This simulates a webhook request from GitHub, **but uses the live GitHub API**, so be careful. Generally, you should use live testing instead, as it's more powerful. The fixture data included in the repo is from a test repository (rmccue/test-linter).
+The first step to replicating production issues is to understand the request being sent to hm-linter. Note that when running against these events, you are **testing against the live GitHub API**, so be careful.
 
-Note also that both a `.env` and private key are required. You can create your own GitHub App to get these, or ping me (@rmccue) to get the details for `hmlinter`.
+Access the CloudWatch Logs for hm-linter (ask the Cloud team for access) and find the request you received. If you have the AWS CLI installed, you can do this by running the `scripts/get-logs.js` command.
 
-Your private key should be saved as `private-key.pem`, and your `.env` should contain this:
+Each check status page lists the various request IDs. The **Lambda ID** is the ID you need for pulling down the relevant logs and data.
 
-```
-APP_ID=5455
-WEBHOOK_SECRET=development
-GIST_ACCESS_TOKEN=...
-```
+This will write the logs to `{id}.log`, and save the raw data to `{id}.json`.
 
-(You will need to generate your own `GIST_ACCESS_TOKEN`: this is a GitHub personal access token with `gist` scope.)
+```sh
+# For request deadbeef-badd-ecaf-dead-beefbaddecaf:
+node scripts/get-logs.js deadbeef-badd-ecaf-dead-beefbaddecaf
 
-To test a `push` webhook:
-
-```
-node_modules/.bin/probot simulate push fixtures/push.json ./plugin/linter.js
+# By default, this will only check the last 48 hours; to override, set HOUR_LIMIT:
+HOUR_LIMIT=192 node scripts/get-logs.js deadbeef-badd-ecaf-dead-beefbaddecaf
 ```
 
-To test a `pull_request.open` webhook:
+```
+Querying for deadbeef-badd-ecaf-dead-beefbaddecaf
+Waiting for results…
+Log saved to:           deadbeef-badd-ecaf-dead-beefbaddecaf.log
+Raw data saved to:      deadbeef-badd-ecaf-dead-beefbaddecaf.json
+```
+
+You can then run the handler against a simulated Lambda environment locally (using Docker):
 
 ```
-node_modules/.bin/probot simulate pull_request fixtures/pull_request.opened.json ./plugin/linter.js
+# Run build at least once:
+npm run build
+
+# Run the handler.
+npm run test < deadbeef-badd-ecaf-dead-beefbaddecaf.json
 ```
 
-To test a `pull_request.synchronize` webhook:
+**Note:** The format of the JSON data passed to `test` **must** be in API Gateway format (i.e. from the get-logs script). If you get an `Cannot read property 'x-github-event' of undefined` error, you're passing a GitHub event instead (i.e. from Smee).
 
-```
-node_modules/.bin/probot simulate pull_request fixtures/pull_request.synchronize.json ./plugin/linter.js
-```
 
 ### Deployment
 
@@ -153,9 +163,6 @@ Deployment can be done in one step by running the `deploy` script, but you shoul
 * `build` - Builds JS, downloads PHP binary, and installs Composer/npm dependencies.
 * `deploy:package` - Builds the directory into a zip. Use this to verify the ZIP before pushing.
 * `deploy:push` - Push the built zip to Lambda. Use this if `deploy` fails due to some sort of network error.
-* `test` - Run the index handler against a simulated Lambda environment. Before running this:
-	* Run `build` at least once
-	* Set the `AWS_LAMBDA_EVENT_BODY` environment variable to the contents of `fixtures/lambda-test-event.json` (`cat fixtures/lambda-test-event.json | read -z AWS_LAMBDA_EVENT_BODY`)
 
 
 ## Advanced Configuration
@@ -169,6 +176,6 @@ Deployment settings can be changed using environment variables. In addition to t
 * `FORCE_STANDARD_PHPCS` - Standard to use for checking, overrides any user standard (default disabled)
 * `DEFAULT_STANDARD_PHPCS` - Default standard to check against for phpcs (default `vendor/humanmade/coding-standards`)
 * `DEFAULT_STANDARD_ESLINT` - Default standard to check against for ESLint (default `eslint-config-humanmade`)
-* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hmlinter`)
+* `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hm-linter`)
 * `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
 * `FORCE_NEUTRAL_STATUS` - Mark failed checks as "neutral", which shows the check but does not mark it as failed (default disabled)
