@@ -7,6 +7,7 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 const pify = require( 'pify' );
 
+const { DEFAULT_CONFIG } = require( './config' );
 const prepareLinters = require( './linters' );
 const { combineLinters } = require( './util' );
 
@@ -84,19 +85,8 @@ module.exports = async ( event, context ) => {
 
 		// Then, prepare the linters.
 		const config = {
+			...DEFAULT_CONFIG,
 			version: data.get( 'version' ) || 'latest',
-			phpcs: {
-				enabled: true,
-				version: 'inherit',
-			},
-			eslint: {
-				enabled: true,
-				version: 'inherit',
-			},
-			stylelint: {
-				enabled: false,
-				version: 'inherit',
-			},
 		};
 		const linters = await prepareLinters( Promise.resolve( config ) );
 

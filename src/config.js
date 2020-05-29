@@ -51,3 +51,5 @@ module.exports = async ( context, head ) => {
 		}
 	}
 };
+
+module.exports.DEFAULT_CONFIG = DEFAULT_CONFIG;
