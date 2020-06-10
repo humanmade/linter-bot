@@ -83,35 +83,40 @@ module.exports = standardPath => codepath => {
 			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
 		}
 
-		const installedPaths = [
-			'vendor/fig-r/psr2r-sniffer',
-			'vendor/humanmade/coding-standards/HM',
-			'vendor/phpcompatibility/php-compatibility',
-			'vendor/phpcompatibility/phpcompatibility-paragonie',
-			'vendor/phpcompatibility/phpcompatibility-wp',
-			'vendor/wp-coding-standards/wpcs',
-		]
-
-		// Only include HM-Required if the path exists within this version of the standards.
-		if ( fs.existsSync( path.join( standardPath, 'vendor', 'humanmade', 'coding-standards', 'HM-Required' ) ) ) {
-			installedPaths.push( 'vendor/humanmade/coding-standards/HM-Required' );
-		}
-
-		// Only include the VIP WPCS if the path exists within this version of the standards.
-		if ( fs.existsSync( path.join( standardPath, 'vendor', 'automattic', 'vipwpcs' ) ) ) {
-			installedPaths.push( 'vendor/automattic/vipwpcs' );
-		}
-
+		// Set the main options.
 		const args = [
 			phpcsPath,
-			'-q',
-			'--runtime-set',
-			'installed_paths',
-			installedPaths.join( ',' ),
+      '-q',
 			`--standard=${standard}`,
 			'--report=json',
-			codepath
 		];
+
+		// If dealerdirect/phpcodesniffer-composer-installer wasn't installed,
+		// the configuration file won't exist.
+		if ( ! fs.existsSync( path.join( standardPath, 'vendor', 'squizlabs', 'php_codesniffer', 'CodeSniffer.conf' ) ) ) {
+			const installedPaths = [
+				'vendor/fig-r/psr2r-sniffer',
+				'vendor/humanmade/coding-standards/HM',
+				'vendor/humanmade/coding-standards/HM-Required',
+				'vendor/phpcompatibility/php-compatibility',
+				'vendor/phpcompatibility/phpcompatibility-paragonie',
+				'vendor/phpcompatibility/phpcompatibility-wp',
+				'vendor/wp-coding-standards/wpcs',
+			]
+
+			// Only include the VIP WPCS if the path exists within this version of the standards.
+			if ( fs.existsSync( path.join( standardPath, 'vendor', 'automattic', 'vipwpcs' ) ) ) {
+				installedPaths.push( 'vendor/automattic/vipwpcs' );
+			}
+
+			// Add the installed paths to the CLI.
+			args.push(
+				'--runtime-set',
+				'installed_paths',
+				installedPaths.join( ',' ),
+			);
+		}
+
 		const opts = {
 			cwd: standardPath,
 			env: process.env,
