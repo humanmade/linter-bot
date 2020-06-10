@@ -98,7 +98,6 @@ module.exports = standardPath => codepath => {
 			);
 		}
 
-		// Finally, add codepath.
 		const opts = {
 			cwd: standardPath,
 			env: process.env,
