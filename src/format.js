@@ -1,8 +1,22 @@
 const metadata = require( './metadata' );
 const { combineLinters } = require( './util' );
 
+/**
+ * Retrieves the singular or plural form based on the supplied number.
+ *
+ * @param {String} single Singular form of the text.
+ * @param {String} plural Plural form of the text.
+ * @param {Number} count  Quantity to compare against.
+ * @returns {String}
+ */
 const _n = ( single, plural, count ) => count === 1 ? single : plural;
 
+/**
+ * Format an overall summary string from test results.
+ *
+ * @param {Object} status Results of a linting run.
+ * @returns {string} Concatenated summary string.
+ */
 const formatSummary = status => {
 	const { passed, totals } = status;
 	if ( passed ) {
@@ -19,6 +33,12 @@ const formatSummary = status => {
 	return summaryBits.join( ', ' );
 };
 
+/**
+ * Format a string that compares previous and current check runs.
+ *
+ * @param {Object} comparison Comparison details.
+ * @returns {string} Concatenated comparison results string.
+ */
 const formatComparison = comparison => {
 	const { fixedErrors, fixedWarnings, newErrors, newWarnings } = comparison.totals;
 
@@ -48,8 +68,14 @@ const formatComparison = comparison => {
 		.join( '\n' );
 
 	return status;
-}
+};
 
+/**
+ * Group linting results by filename.
+ *
+ * @param {Object} combined Object of all linting comments against a file set.
+ * @returns {Object} Linting results broken out by filename.
+ */
 const resultsByFile = combined => {
 	// Combine all messages.
 	const files = {};
@@ -70,6 +96,13 @@ const resultsByFile = combined => {
 	return files;
 };
 
+/**
+ * Format an inline comment for inline reviews.
+ *
+ * @param {Object} files   Files linted and their linting results.
+ * @param {Object} mapping Diff mapping of all files changes in a Pull Request.
+ * @returns {Object} Code comments.
+ */
 const formatComments = ( files, mapping ) => {
 	// Convert to GitHub comments.
 	const comments = [];
@@ -100,8 +133,17 @@ const formatComments = ( files, mapping ) => {
 	} );
 
 	return { comments, skipped };
-}
+};
 
+/**
+ * Format a review summary string.
+ *
+ * This text is used as the summary for a Pull Request review.
+ *
+ * @param {Object} lintState Results of a linting run.
+ * @param {Array}  mapping   Diff mapping of all files changes in a Pull Request.
+ * @returns {Object} Data about a review.
+ */
 const formatReview = ( lintState, mapping ) => {
 	// Convert to GitHub comments.
 	const allResults = combineLinters( lintState.results );
@@ -132,6 +174,17 @@ const formatReview = ( lintState, mapping ) => {
 	};
 };
 
+/**
+ * Format a review summary string for subsequent PR runs.
+ *
+ * This text is used when the Linter Bot is running for a second (or greater)
+ * time on a Pull Request.
+ *
+ * @param {Object} lintState  Results of a linting run.
+ * @param {Array}  mapping    Diff mapping of all files changes in a Pull Request.
+ * @param {Object} comparison Comparison data.
+ * @returns {Object} GH-ready review data.
+ */
 const formatReviewChange = ( lintState, mapping, comparison ) => {
 	// Don't change the previous review if nothing in the codebase has changed.
 	if ( ! comparison.changed ) {
@@ -160,8 +213,15 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 	};
 
 	return review;
-}
+};
 
+/**
+ * Format annotation data to send to GitHub.
+ *
+ * @param {Object} state   Results of a linting run.
+ * @param {String} baseUrl Base URL of the GitHub changeset.
+ * @returns {Array} Compiled annotations for sending to GH.
+ */
 const formatAnnotations = ( state, baseUrl ) => {
 	const combined = combineLinters( state.results );
 
@@ -196,8 +256,12 @@ const formatAnnotations = ( state, baseUrl ) => {
 const formatMetadata = context => {
 	const { metadata, reqContext } = context;
 
+	if ( ! metadata ) {
+		return '';
+	}
+
 	let body = '<details><summary>Request details</summary><ul>';
-	body += `\n<li><strong>GitHub Event ID:</strong> <code>${ metadata.headers['X-GitHub-Delivery'] }</code></li>`;
+	body += `\n<li><strong>GitHub Event ID:</strong> <code>${ metadata.headers['X-GitHub-Delivery'] || 'UNKNOWN' }</code></li>`;
 	body += `\n<li><strong>API Gateway ID:</strong> <code>${ metadata.requestContext.requestId }</code></li>`;
 	body += `\n<li><strong>Lambda ID:</strong> <code>${ reqContext.awsRequestId }</code></li>`;
 	body += `\n<li><strong>Log Stream:</strong> <code>${ reqContext.logStreamName }</code></li>`;
@@ -205,16 +269,31 @@ const formatMetadata = context => {
 	return body;
 };
 
+/**
+ * Format a welcome message for users who have just activated the bot on the repo.
+ *
+ * @todo:: fix this as it is broken atm.
+ *
+ * @param {Object} state   Results of a linting run.
+ * @param {String} gistUrl URL of the gist where the cumulative initial results are stored.
+ * @returns {string} Welcome data.
+ */
 const formatWelcome = ( state, gistUrl ) => {
-	let body = `Hi there! Thanks for activating hm-linter on this repo.`
+	let body = `Hi there! Thanks for activating hm-linter on this repo.`;
 	body += `\n\nTo start you off, [here's an initial lint report of the repo](${ gistUrl }).`;
 	body += ` I found ${ formatSummary( state ) } in your project.`;
-	body += `\n\nFor more information about hm-linter, see [the project repo](https://github.com/humanmade/linter-bot).`
+	body += `\n\nFor more information about hm-linter, see [the project repo](https://github.com/humanmade/linter-bot).`;
 	body += ` If you need a hand with anything, ping @rmccue or @joehoyle who are always happy to help.`;
 	body += `\n\n:heart: :robot:`;
 	return body;
 };
 
+/**
+ * Convert the whole results of a linting run into a JSON string for debugging.
+ *
+ * @param {Object} state Results of a linting run.
+ * @returns {string}
+ */
 const formatDetails = state => {
 	return JSON.stringify( state, null, 2 );
 };

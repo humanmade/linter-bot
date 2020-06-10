@@ -3,6 +3,12 @@ const Module = require( 'module' );
 const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
 
+/**
+ * Convert a ESLint error into formatOutput-style results.
+ *
+ * @param {Object} message Raw message data from eslint.
+ * @returns {Object}
+ */
 const formatMessage = message => {
 	return {
 		line:     message.line,
@@ -13,6 +19,13 @@ const formatMessage = message => {
 	};
 };
 
+/**
+ * Convert ESLint results into common output format.
+ *
+ * @param {Object} data     Warnings and errors from eslint.
+ * @param {String} codepath Path to the code getting linted.
+ * @returns {{files, totals: {warnings: *, errors: *}}}
+ */
 const formatOutput = ( data, codepath ) => {
 	const totals = {
 		errors:   data.errorCount,
@@ -63,8 +76,20 @@ const run = ( engine, codepath ) => {
 	}
 };
 
+/**
+ * ESLint standard to use when running eslint.
+ *
+ * This can be customized by setting the DEFAULT_STANDARD_ESLINT environment variable.
+ *
+ * @type {string}
+ */
 const DEFAULT_STANDARD = process.env.DEFAULT_STANDARD_ESLINT || 'eslint-config-humanmade';
 
+/**
+ * Run eslint linting.
+ *
+ * @param {String} standardPath Path to custom standard set.
+ */
 module.exports = standardPath => codepath => {
 	const options = {
 		cwd: codepath,

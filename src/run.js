@@ -45,5 +45,9 @@ module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 		return totals;
 	}, { errors: 0, warnings: 0 } );
 
-	return { totals, passed: totals.errors === 0, results };
+	return {
+		passed: totals.errors === 0 && totals.warnings === 0,
+		totals,
+		results,
+	};
 };
