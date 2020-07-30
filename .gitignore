@@ -7,3 +7,5 @@ src/linters/phpcs/vendor
 bin/
 lib/
 event.json
+lambda-function.zip
+package-lock.json
