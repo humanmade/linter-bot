@@ -86,6 +86,16 @@ const run = ( engine, codepath ) => {
 const DEFAULT_STANDARD = process.env.DEFAULT_STANDARD_ESLINT || 'eslint-config-humanmade';
 
 /**
+ * Alternative (new) package name for the eslint standard.
+ *
+ * This cannot be customized, and should be swapped with the fallback for the
+ * DEFAULT_STANDARD_ESLINT variable once v1.0.0 is the default "latest" version.
+ *
+ * @type {string}
+ */
+const ALTERNATE_STANDARD = '@humanmade/eslint-config';
+
+/**
  * Run eslint linting.
  *
  * @param {String} standardPath Path to custom standard set.
@@ -103,13 +113,13 @@ module.exports = standardPath => codepath => {
 	// standard itself is loaded from the right place.
 	moduleAlias.addPath( `${ standardPath }/node_modules` );
 	moduleAlias.addAlias( DEFAULT_STANDARD, standardPath );
-	moduleAlias.addAlias( '@humanmade/eslint-config', standardPath );
+	moduleAlias.addAlias( ALTERNATE_STANDARD, standardPath );
 
 	const actualStandardPath = require.resolve( DEFAULT_STANDARD );
 	const origFindPath = Module._findPath;
 	Module._findPath = ( name, ...args ) => {
 		const path = origFindPath( name, ...args );
-		if ( ! path && name === DEFAULT_STANDARD ) {
+		if ( ! path && ( name === DEFAULT_STANDARD || name === ALTERNATE_STANDARD ) ) {
 			return actualStandardPath;
 		}
 		return path;
