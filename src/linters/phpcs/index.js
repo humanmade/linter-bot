@@ -92,9 +92,9 @@ module.exports = standardPath => codepath => {
 			'vendor/wp-coding-standards/wpcs',
 		]
 
-		// Only include HM-Required if the path exists within this version of the standards.
-		if ( fs.existsSync( path.join( standardPath, 'vendor', 'humanmade', 'coding-standards', 'HM-Required' ) ) ) {
-			installedPaths.push( 'vendor/humanmade/coding-standards/HM-Required' );
+		// Only include HM-Minimum if the path exists within this version of the standards.
+		if ( fs.existsSync( path.join( standardPath, 'vendor', 'humanmade', 'coding-standards', 'HM-Minimum' ) ) ) {
+			installedPaths.push( 'vendor/humanmade/coding-standards/HM-Minimum' );
 		}
 
 		// Only include the VIP WPCS if the path exists within this version of the standards.
