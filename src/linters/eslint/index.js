@@ -103,6 +103,7 @@ module.exports = standardPath => codepath => {
 	// standard itself is loaded from the right place.
 	moduleAlias.addPath( `${ standardPath }/node_modules` );
 	moduleAlias.addAlias( DEFAULT_STANDARD, standardPath );
+	moduleAlias.addAlias( '@humanmade/eslint-config', standardPath );
 
 	const actualStandardPath = require.resolve( DEFAULT_STANDARD );
 	const origFindPath = Module._findPath;
