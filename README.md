@@ -10,7 +10,7 @@
 	</tr>
 	<tr>
 		<td>
-			A <strong><a href="https://hmn.md/">Human Made</a></strong> project. Maintained by @rmccue and @joehoyle.
+			A <strong><a href="https://hmn.md/">Human Made</a></strong> project. Maintained by @rmccue.
 		</td>
 		<td align="center" width="30%">
 			<img src="https://hmn.md/content/themes/hmnmd/assets/images/hm-logo.svg" width="100" />
