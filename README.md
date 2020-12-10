@@ -48,8 +48,10 @@ By default, hmlinter will use the latest version of the Human Made coding standa
 version: latest
 
 # PER-STANDARD SETTINGS
+# If you specify any version number in the per-standard settings,
+# you must also set enabeled to true otherwise it will default to false.
 phpcs:
-    # Set to false to disable phpcs
+    # Set to false to disable phpcs.
     enabled: true
 
     # Set to "inherit" to use the global version, "latest" for the latest
