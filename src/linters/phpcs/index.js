@@ -1,5 +1,5 @@
 const child_process = require( 'child_process' );
-const fs = require( 'fs' );
+const fs = require('graceful-fs');
 const path = require( 'path' );
 
 const CONFIG_NAMES = [

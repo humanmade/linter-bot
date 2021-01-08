@@ -1,5 +1,5 @@
 const probotUtil = require( '@humanmade/probot-util' );
-const fs = require( 'fs' );
+const fs = require('graceful-fs');
 const https = require( 'https' );
 const path = require( 'path' );
 const pify = require( 'pify' );
