@@ -61,7 +61,7 @@ eslint:
     version: inherit
 
 stylelint:
-    enabled: false
+    enabled: true
     version: inherit
 ```
 
