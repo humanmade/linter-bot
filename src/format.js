@@ -30,6 +30,9 @@ const formatSummary = status => {
 	if ( totals.warnings ) {
 		summaryBits.push( `${ totals.warnings } ${ _n( 'warning', 'warnings', totals.warnings ) }` );
 	}
+	if ( totals.skipped ) {
+		summaryBits.push( `${ totals.skipped } skipped`);
+	}
 	return summaryBits.join( ', ' );
 };
 
@@ -225,15 +228,27 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
  *
  * @param {Object} state   Results of a linting run.
  * @param {String} baseUrl Base URL of the GitHub changeset.
+ * @param {Array}  mapping    Diff mapping of all files changes in a Pull Request.
  * @returns {Array} Compiled annotations for sending to GH.
  */
-const formatAnnotations = ( state, baseUrl ) => {
+const formatAnnotations = ( state, baseUrl, mapping ) => {
 	const combined = combineLinters( state.results );
-
+	state.totals.skipped = 0;
+	const files = resultsByFile( combined );
 	const annotations = [];
 	Object.keys( combined ).forEach( file => {
 		const comments = combined[ file ];
 		comments.forEach( comment => {
+			if( process.env.CHECK_ANNOTATION_ONLY_RELATED ){
+				if ( ! mapping[ file ] ) {
+					state.totals.skipped += files[ file ][ comment.line ].length;
+					return;
+				}
+				if ( ! mapping[ file ][ comment.line ] ) {
+					state.totals.skipped += files[ file ][ comment.line ].length;
+					return;
+				}
+			}
 			const url = `${ baseUrl }/${ file }`;
 			annotations.push( {
 				path: file,

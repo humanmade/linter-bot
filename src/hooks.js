@@ -120,7 +120,7 @@ const onCheck = async context => {
 	// Start a "build".
 	const { github, payload } = context;
 
-	const { head_branch, head_sha } = payload.check_suite || payload.check_run.check_suite;
+	const { head_branch, head_sha, pull_requests } = payload.check_suite || payload.check_run.check_suite;
 
 	const owner = payload.repository.owner.login;
 	const repo = payload.repository.name;
@@ -184,9 +184,12 @@ const onCheck = async context => {
 	};
 
 	const pushConfig = { commit: head_sha, owner, repo };
-	let lintState;
+	let diffMapping = [], lintState;
 	try {
 		lintState = await runForRepo( pushConfig, getConfig( context, head_sha ), github );
+		if ( pull_requests && pull_requests.length > 0 ) {
+			diffMapping = await getDiffMapping( pushConfig, pull_requests[0].number, github )
+		}
 	} catch ( e ) {
 		console.log(e)
 		completeRun(
@@ -241,7 +244,7 @@ const onCheck = async context => {
 			}
 		);
 	} else {
-		const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}` );
+		const annotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}`, diffMapping );
 
 		// Push annotations 50 at a time (and send the leftovers with the completion).
 		const annotationGroups = _chunk( annotations, 50 );
