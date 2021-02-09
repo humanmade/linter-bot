@@ -300,7 +300,15 @@ const onOpenPull = async context => {
 		return;
 	}
 
-	const { body, event, comments } = formatReview( lintState, diffMapping );
+	const { body, event } = formatReview( lintState, diffMapping );
+	console.log( {
+		owner,
+		repo,
+		number:    payload.number,
+		commit_id: commit,
+		body:      body,
+		event,
+	} );
 
 	// path, position, body
 
@@ -308,10 +316,9 @@ const onOpenPull = async context => {
 		owner,
 		repo,
 		number:    payload.number,
-		// commit_id: commit,
+		commit_id: commit,
 		body:      body,
-		 comments,
-		 event
+		event,
 	} );
 };
 
