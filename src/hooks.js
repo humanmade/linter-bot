@@ -226,6 +226,15 @@ const onCheck = async context => {
 			throw e;
 		}
 
+		let annotations;
+		if ( process.env.CHECK_ANNOTATION_ONLY_RELATED ) {
+			const currentAnnotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}`, diffMapping );
+
+			// Push annotations 50 at a time (and send the leftovers with the completion).
+			const annotationGroups = _chunk( currentAnnotations, 50 );
+			annotations = annotationGroups.pop();
+		}
+
 		const summary = formatSummary( lintState );
 		const fullSummary = summary + `\n\n[View output](${ gistUrl })`;
 		completeRun(
@@ -233,6 +242,7 @@ const onCheck = async context => {
 			{
 				title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
 				summary: fullSummary,
+				annotations,
 			}
 		);
 	} else if ( lintState.passed ) {

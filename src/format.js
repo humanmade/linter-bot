@@ -239,7 +239,7 @@ const formatAnnotations = ( state, baseUrl, mapping ) => {
 	Object.keys( combined ).forEach( file => {
 		const comments = combined[ file ];
 		comments.forEach( comment => {
-			if( process.env.CHECK_ANNOTATION_ONLY_RELATED ){
+			if ( process.env.CHECK_ANNOTATION_ONLY_RELATED ) {
 				if ( ! mapping[ file ] ) {
 					state.totals.skipped += files[ file ][ comment.line ].length;
 					return;

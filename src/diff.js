@@ -31,7 +31,7 @@ module.exports.getDiffMapping = async ( pushConfig, number, github ) => {
 			}
 			chunk.changes.forEach( change => {
 				position++;
-				if( change.type === "add" ) {
+				if ( change.type === "add" ) {
 					mapping[ file.to ][ change.ln || change.ln2 ] = position;
 				}
 			} );
