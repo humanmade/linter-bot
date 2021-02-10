@@ -179,3 +179,4 @@ Deployment settings can be changed using environment variables. In addition to t
 * `LAMBDA_FUNCTION` - Lambda function name for the `deploy` command (default `hm-linter`)
 * `LAMBDA_REGION` - Lambda function region for the `deploy` command (default `us-east-1`)
 * `FORCE_NEUTRAL_STATUS` - Mark failed checks as "neutral", which shows the check but does not mark it as failed (default disabled)
+* `CHECK_ANNOTATION_ONLY_RELATED` - Post annotation in check for change which are related to current change instead of all (default disabled)
