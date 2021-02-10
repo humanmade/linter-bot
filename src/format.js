@@ -193,10 +193,6 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 	if ( ! comparison.changed ) {
 		return null;
 	}
-	// Convert to GitHub comments.
-	const allResults = combineLinters( lintState.results );
-	const files = resultsByFile( allResults );
-	const { comments, skipped } = formatComments( files, mapping );
 
 	if ( lintState.passed ) {
 		const body = `Linting successful, all issues fixed! :tada:`;
@@ -217,7 +213,6 @@ const formatReviewChange = ( lintState, mapping, comparison ) => {
 		// Don't allow the body to overflow.
 		body: withMetadata.length < 65536 ? withMetadata : body,
 		event: 'REQUEST_CHANGES',
-		comments
 	};
 
 	return review;
