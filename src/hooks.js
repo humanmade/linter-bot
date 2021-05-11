@@ -226,7 +226,7 @@ const onCheck = async context => {
 			throw e;
 		}
 
-		let annotationGroups;
+		let annotationGroups = [];
 		if ( process.env.CHECK_ANNOTATION_ONLY_RELATED ) {
 			const currentAnnotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}`, diffMapping );
 
@@ -234,19 +234,26 @@ const onCheck = async context => {
 			annotationGroups = _chunk( currentAnnotations, 50 );
 		}
 
+		let lastAnnotationGroup =  annotationGroups.pop();
 		const summary = formatSummary( lintState );
 		const fullSummary = summary + `\n\n[View output](${ gistUrl })`;
-		// To create more than 50 annotations, we have to make multiple requests to the Update a check run 
-		annotationGroups.forEach( annotationGroup => {
-			completeRun(
-				'neutral',
-				{
-					title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
-					summary: fullSummary,
-					annotations: annotationGroup,
-				}
-			);
-		} )
+
+		await Promise.all( annotationGroups.map( chunk => {
+			return updateRun( {
+				title: 'Checking…',
+				summary: '',
+				annotations: chunk,
+			} );
+		} ) );
+
+		completeRun(
+			'neutral',
+			{
+				title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
+				summary: fullSummary,
+				annotations: lastAnnotationGroup,
+			}
+		);
 	} else if ( lintState.passed ) {
 		completeRun(
 			'success',
