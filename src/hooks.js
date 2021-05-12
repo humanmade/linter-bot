@@ -226,23 +226,32 @@ const onCheck = async context => {
 			throw e;
 		}
 
-		let annotations;
+		let annotationGroups = [];
 		if ( process.env.CHECK_ANNOTATION_ONLY_RELATED ) {
 			const currentAnnotations = formatAnnotations( lintState, `https://github.com/${owner}/${repo}/blob/${head_sha}`, diffMapping );
 
 			// Push annotations 50 at a time (and send the leftovers with the completion).
-			const annotationGroups = _chunk( currentAnnotations, 50 );
-			annotations = annotationGroups.pop();
+			annotationGroups = _chunk( currentAnnotations, 50 );
 		}
 
+		let lastAnnotationGroup =  annotationGroups.pop();
 		const summary = formatSummary( lintState );
 		const fullSummary = summary + `\n\n[View output](${ gistUrl })`;
+
+		await Promise.all( annotationGroups.map( chunk => {
+			return updateRun( {
+				title: 'Checking…',
+				summary: '',
+				annotations: chunk,
+			} );
+		} ) );
+
 		completeRun(
 			'neutral',
 			{
 				title: lintState.passed ? 'All checks passed' : `Ignored ${ summary }`,
 				summary: fullSummary,
-				annotations,
+				annotations: lastAnnotationGroup,
 			}
 		);
 	} else if ( lintState.passed ) {

@@ -104,6 +104,8 @@ module.exports = standardPath => codepath => {
 
 		const args = [
 			phpcsPath,
+			'-d',
+			'memory_limit=1G',
 			'-q',
 			'--runtime-set',
 			'installed_paths',
