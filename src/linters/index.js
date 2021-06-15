@@ -9,8 +9,8 @@ const available = {
 	stylelint: require( './stylelint' ),
 };
 const enabled = ( process.env.ENABLED_LINTERS || 'eslint,phpcs,stylelint' ).split( ',' );
-
-const STANDARDS_DIR = '/tmp/hmlinter-standards';
+const TEMP_DIR = process.env.TEMP_DIR || '/tmp'
+const STANDARDS_DIR = `${ TEMP_DIR }/hmlinter-standards`;
 const BASE_URL = process.env.STANDARD_URL || 'https://make.hmn.md/hmlinter/standards';
 
 /**

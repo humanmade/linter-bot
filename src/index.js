@@ -5,10 +5,11 @@ const { onAdd, onCheck, onPush, onOpenPull, onUpdatePull } = require( './hooks' 
 
 const clean = async () => {
 	// Clean up the tmp directories.
-	console.log( 'Cleaning up /tmp' );
+	const TEMP_DIR = process.env.TEMP_DIR || '/tmp'
+	console.log( `Cleaning up ${ TEMP_DIR }` );
 	const rmrf = pify( rimraf );
-	await rmrf( '/tmp/downloads' );
-	await rmrf( '/tmp/repos' );
+	await rmrf( `${ TEMP_DIR }/downloads` );
+	await rmrf( `${ TEMP_DIR }/repos` );
 };
 const withClean = func => ( ...args ) => func( ...args ).then( () => clean() );
 

@@ -9,8 +9,8 @@ const tar = require( 'tar' );
 const realpath = pify( fs.realpath );
 
 const getLinters = require( './linters' );
-
-const REPO_DIR = '/tmp/repos';
+const TEMP_DIR = process.env.TEMP_DIR || '/tmp'
+const REPO_DIR = `${ TEMP_DIR }/repos`;
 
 module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
 	const { commit, owner, repo } = pushConfig;
