@@ -11,7 +11,7 @@ const clean = async () => {
 	await rmrf( `${ TEMP_DIR }/downloads` );
 	await rmrf( `${ TEMP_DIR }/repos` );
 };
-const withClean = func => ( ...args ) => func( ...args ).then( () => clean() );
+const withClean = func => ( ...args ) => func( ...args ).finally( () => clean() );
 
 module.exports = robot => {
 	robot.on( 'installation_repositories.added', withClean( onAdd ) );
