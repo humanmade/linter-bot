@@ -13,13 +13,13 @@ const TEMP_DIR = process.env.TEMP_DIR || '/tmp'
 const REPO_DIR = `${ TEMP_DIR }/repos`;
 
 module.exports = async ( pushConfig, config, github, allowReuse = false ) => {
-	const { commit, owner, repo } = pushConfig;
+	const { commit, owner, repo, id } = pushConfig;
 
 	// Start setting up the linters.
 	const linterPromise = getLinters( config );
 
 	await probotUtil.file.ensureDirectory( REPO_DIR );
-	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}` );
+	const extractDir = path.join( await realpath( REPO_DIR ), `${owner}-${repo}-${commit}-${id}` );
 
 	if ( ! allowReuse || ! fs.existsSync( extractDir ) ) {
 		await probotUtil.repo.download( extractDir, pushConfig, github );

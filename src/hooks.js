@@ -120,7 +120,18 @@ const onCheck = async context => {
 	// Start a "build".
 	const { github, payload } = context;
 
-	const { head_branch, head_sha, pull_requests } = payload.check_suite || payload.check_run.check_suite;
+	let id, head_branch, head_sha, pull_requests;
+
+	if( payload.check_suite ) {
+		( { id, head_branch, head_sha, pull_requests } = payload.check_suite || payload.check_run.check_suite );
+	} else if ( payload.check_run && payload.check_run.check_suite ){
+		( { id, head_branch, head_sha, pull_requests } = payload.check_run.check_suite );
+	} else if( payload.pull_request ) {
+		pull_requests = [ payload.pull_request ];
+		head_branch = payload.pull_request.head.ref;
+		head_sha = payload.pull_request.head.sha;
+		id = payload.pull_request.id;
+	}
 
 	const owner = payload.repository.owner.login;
 	const repo = payload.repository.name;
@@ -183,7 +194,7 @@ const onCheck = async context => {
 		} );
 	};
 
-	const pushConfig = { commit: head_sha, owner, repo };
+	const pushConfig = { commit: head_sha, owner, repo, id };
 	let diffMapping = [], lintState;
 	try {
 		lintState = await runForRepo( pushConfig, getConfig( context, head_sha ), github );
