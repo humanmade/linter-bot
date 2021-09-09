@@ -126,11 +126,13 @@ const onCheck = async context => {
 		( { id, head_branch, head_sha, pull_requests } = payload.check_suite || payload.check_run.check_suite );
 	} else if ( payload.check_run && payload.check_run.check_suite ){
 		( { id, head_branch, head_sha, pull_requests } = payload.check_run.check_suite );
-	} else if( payload.pull_request ) {
+	} else if ( payload.pull_request ) {
 		pull_requests = [ payload.pull_request ];
 		head_branch = payload.pull_request.head.ref;
 		head_sha = payload.pull_request.head.sha;
 		id = payload.pull_request.id;
+	} else {
+		throw 'No pull-request and commit data available for the request.';
 	}
 
 	const owner = payload.repository.owner.login;

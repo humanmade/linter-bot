@@ -13,11 +13,13 @@ const clean = async ( context ) => {
 
 	if ( payload.check_suite ) {
 		( { head_sha, id } = payload.check_suite );
-	} else if ( payload.check_run && payload.check_run.check_suite ){
+	} else if ( payload.check_run && payload.check_run.check_suite ) {
 		( { head_sha, id } = payload.check_run.check_suite );
-	} else if( payload.pull_request ){
+	} else if( payload.pull_request ) {
 		head_sha = payload.pull_request.head.sha;
 		id = payload.pull_request.id;
+	} else {
+		throw 'No pull-request and commit data available for the request.';
 	}
 
 	const owner = payload.repository.owner.login;
