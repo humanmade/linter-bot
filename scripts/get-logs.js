@@ -1,5 +1,5 @@
 const child_process = require( 'child_process' );
-const fs = require( 'fs' );
+const fs = require('graceful-fs');
 
 const reqId = process.argv[2];
 const HOUR_LIMIT = process.env.HOUR_LIMIT || 48;

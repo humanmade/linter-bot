@@ -1,4 +1,4 @@
-const fs = require( 'fs' );
+const fs = require('graceful-fs');
 const Module = require( 'module' );
 const path = require( 'path' );
 const moduleAlias = require( 'module-alias' );
