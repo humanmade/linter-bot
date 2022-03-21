@@ -1,0 +1,42 @@
+# Lambda base image Amazon linux
+FROM public.ecr.aws/lambda/provided as builder
+
+# Set desired PHP Version
+ARG php_version="7.4.27"
+RUN echo ${php_version}
+RUN yum clean all && \
+    yum install -y autoconf \
+                bison \
+                bzip2-devel \
+                gcc \
+                gcc-c++ \
+                git \
+                gzip \
+                libcurl-devel \
+                libicu-devel \
+                libtool \
+                libxml2-devel \
+                make \
+                oniguruma-devel \
+                openssl-devel \
+                re2c \
+                sqlite \
+                sqlite-devel \
+                tar \
+                unzip \
+                xz-devel \
+                zip
+
+# Download the PHP source, compile, and install both PHP and Composer
+RUN curl -sL https://github.com/php/php-src/archive/php-${php_version}.tar.gz | tar -xvz && \
+    cd php-src-php-${php_version} && \
+    ./buildconf --force && \
+    ./configure --prefix=/opt/php-bin/ --with-openssl --with-curl --with-zlib --without-pear --enable-bcmath --with-bz2 --enable-mbstring --with-mysqli && \
+    make -j 5 && \
+    make install && \
+    /opt/php-bin/bin/php -v
+
+# Export binary as output
+FROM scratch as export
+ARG php_version
+COPY --from=builder /opt/php-bin/bin/php /php@${php_version}
