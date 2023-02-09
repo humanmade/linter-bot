@@ -36,7 +36,13 @@ RUN curl -sL https://github.com/php/php-src/archive/php-${php_version}.tar.gz | 
     make install && \
     /opt/php-bin/bin/php -v
 
+COPY copy-dependencies.php /copy-deps.php
+COPY libs-x86.txt /libs-x86.txt
+RUN mkdir /opt/php-bin/lib-export
+RUN /opt/php-bin/bin/php /copy-deps.php /opt/php-bin/bin/php /opt/php-bin/lib-export
+RUN ls  /opt/php-bin/lib-export
 # Export binary as output
 FROM scratch as export
 ARG php_version
-COPY --from=builder /opt/php-bin/bin/php /php@${php_version}
+COPY --from=builder /opt/php-bin/bin/php /bin/php
+COPY --from=builder /opt/php-bin/lib-export /lib

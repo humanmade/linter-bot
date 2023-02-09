@@ -8,4 +8,5 @@ fi
 PHP_VERSION="$1"
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-docker build --build-arg "php_version=${PHP_VERSION}" -o bin - < "$SCRIPT_DIR/Dockerfile.build-php"
+cd $SCRIPT_DIR
+docker build --platform linux/amd64 --progress plain --build-arg "php_version=${PHP_VERSION}" -f "Dockerfile.build-php" -o ../ .
