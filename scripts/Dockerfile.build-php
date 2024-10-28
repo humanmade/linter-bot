@@ -1,8 +1,8 @@
 # Lambda base image Amazon linux
-FROM public.ecr.aws/lambda/provided as builder
+FROM public.ecr.aws/lambda/provided:al2 AS builder
 
 # Set desired PHP Version
-ARG php_version="7.4.27"
+ARG php_version="8.2.24"
 RUN echo ${php_version}
 RUN yum clean all && \
     yum install -y autoconf \
@@ -42,7 +42,7 @@ RUN mkdir /opt/php-bin/lib-export
 RUN /opt/php-bin/bin/php /copy-deps.php /opt/php-bin/bin/php /opt/php-bin/lib-export
 RUN ls  /opt/php-bin/lib-export
 # Export binary as output
-FROM scratch as export
+FROM scratch AS export
 ARG php_version
 COPY --from=builder /opt/php-bin/bin/php /bin/php
 COPY --from=builder /opt/php-bin/lib-export /lib

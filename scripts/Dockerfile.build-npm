@@ -1,0 +1,12 @@
+# Lambda base image Amazon linux
+FROM public.ecr.aws/lambda/nodejs:20 AS builder
+
+# Build Node Modules
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+RUN npm ci
+
+# Export binary as output
+FROM scratch AS export
+
+COPY --from=builder /var/task/node_modules node_modules
