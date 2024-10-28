@@ -1,6 +1,8 @@
 *.pem
 .env
+.history
 build/
+build-bin/
 node_modules
 probot/
 src/linters/phpcs/vendor

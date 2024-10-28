@@ -11,6 +11,7 @@ const DEFAULT_CONFIG = {
 	phpcs: {
 		enabled: true,
 		version: 'inherit',
+		php: process.env.DEFAULT_PHP || '8.2',
 	},
 	eslint: {
 		enabled: true,

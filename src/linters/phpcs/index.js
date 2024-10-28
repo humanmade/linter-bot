@@ -10,6 +10,8 @@ const CONFIG_NAMES = [
 	'phpcs.ruleset.xml',
 ];
 
+const DEFAULT_PHP = process.env.DEFAULT_PHP || '8.2';
+
 /**
  * Convert a phpcs error into formatOutput-style results.
  *
