@@ -1,16 +1,8 @@
 #!/bin/bash -e
 #
-# Build a fully-static PHP 8.2 CLI binary for the linter-bot Lambda and (optionally)
-# upload it to S3, replacing the legacy pre-8.x binary.
+# scripts/build-php.sh [--upload]
 #
-# Usage:
-#   scripts/build-php.sh                 # build only -> ./bin/php
-#   scripts/build-php.sh --upload        # build, then sync ./bin/php to S3_BIN
-#
-# Requires: Docker (with buildx / linux/amd64 support) and, for --upload, the AWS CLI.
-#
-# S3_BIN defaults to the hm-linter bucket. For altis-review, run again with:
-#   S3_BIN=s3://altis-review/bin scripts/build-php.sh --upload
+# Run again with S3_BIN=s3://altis-review/bin to publish for altis-review.
 
 : "${S3_BIN:=s3://hm-linter/bin}"
 
