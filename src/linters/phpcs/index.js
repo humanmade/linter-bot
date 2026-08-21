@@ -83,10 +83,8 @@ module.exports = standardPath => codepath => {
 			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
 		}
 
-		// Candidate standard paths across all supported versions of the
-		// coding-standards bundle. The vendor layout differs between v1.x and
-		// v2.x (PHP 8.2+ / PHPCS 3.13 / WPCS 3.x / VIP 3.x), so each path is
-		// only included when it actually exists in the extracted tarball.
+		// Only included if present — the vendor layout differs between
+		// coding-standards v1.x and v2.x.
 		const candidatePaths = [
 			'vendor/fig-r/psr2r-sniffer',
 			'vendor/humanmade/coding-standards/HM',
