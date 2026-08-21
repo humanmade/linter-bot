@@ -96,6 +96,8 @@ module.exports = standardPath => codepath => {
 			'vendor/phpcompatibility/phpcompatibility-wp',
 			'vendor/wp-coding-standards/wpcs',
 			'vendor/automattic/vipwpcs',
+			'vendor/phpcsstandards/phpcsextra',
+			'vendor/phpcsstandards/phpcsutils',
 		];
 
 		const installedPaths = candidatePaths.filter(
