@@ -83,24 +83,24 @@ module.exports = standardPath => codepath => {
 			standard = rulesetFiles.find( file => !! file ) || process.env.DEFAULT_STANDARD_PHPCS || 'vendor/humanmade/coding-standards';
 		}
 
-		const installedPaths = [
+		// Only included if present — the vendor layout differs between
+		// coding-standards v1.x and v2.x.
+		const candidatePaths = [
 			'vendor/fig-r/psr2r-sniffer',
 			'vendor/humanmade/coding-standards/HM',
+			'vendor/humanmade/coding-standards/HM-Minimum',
 			'vendor/phpcompatibility/php-compatibility',
 			'vendor/phpcompatibility/phpcompatibility-paragonie',
 			'vendor/phpcompatibility/phpcompatibility-wp',
 			'vendor/wp-coding-standards/wpcs',
-		]
+			'vendor/automattic/vipwpcs',
+			'vendor/phpcsstandards/phpcsextra',
+			'vendor/phpcsstandards/phpcsutils',
+		];
 
-		// Only include HM-Minimum if the path exists within this version of the standards.
-		if ( fs.existsSync( path.join( standardPath, 'vendor', 'humanmade', 'coding-standards', 'HM-Minimum' ) ) ) {
-			installedPaths.push( 'vendor/humanmade/coding-standards/HM-Minimum' );
-		}
-
-		// Only include the VIP WPCS if the path exists within this version of the standards.
-		if ( fs.existsSync( path.join( standardPath, 'vendor', 'automattic', 'vipwpcs' ) ) ) {
-			installedPaths.push( 'vendor/automattic/vipwpcs' );
-		}
+		const installedPaths = candidatePaths.filter(
+			candidate => fs.existsSync( path.join( standardPath, candidate ) )
+		);
 
 		const args = [
 			phpcsPath,
